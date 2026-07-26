@@ -1,6 +1,6 @@
 {
   "name": "mdit-explorer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A markdown-it plugin, For rendering an embedded code explorer similar to VS Code style.",
   "main": "./src/index.js",
   "author": "fdxx",

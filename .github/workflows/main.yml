@@ -1,0 +1,44 @@
+name: GitHub Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Enter version'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - name: Getting own repository
+        uses: actions/checkout@v7
+        with:
+          path: src
+
+      - name: Getting node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: build
+        working-directory: src
+        run: |
+          npm install
+          npm run demo
+          mkdir dist 
+          cp index.html src/style.css src/browser.js dist/
+          
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: src/dist
+
