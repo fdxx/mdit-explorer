@@ -28,7 +28,7 @@ function renderAssets() {
   return `<style data-mdit-explorer-style>\n${stylesheet}</style><script data-mdit-explorer-script>\n${browserScript}</script>`;
 }
 
-function readDirectory(root, current = root) {
+function readDirectory(root, filters, current = root) {
   const entries = fs.readdirSync(current, { withFileTypes: true })
     .filter(entry => entry.name !== '.git' && !entry.isSymbolicLink())
     .sort((a, b) => {
@@ -40,9 +40,13 @@ function readDirectory(root, current = root) {
     const absolutePath = path.join(current, entry.name);
     const relativePath = path.relative(root, absolutePath).split(path.sep).join('/');
     if (entry.isDirectory()) {
-      return [{ type: 'directory', name: entry.name, path: relativePath, children: readDirectory(root, absolutePath) }];
+      const children = readDirectory(root, filters, absolutePath);
+      if (filters.active && children.length === 0) return [];
+      return [{ type: 'directory', name: entry.name, path: relativePath, children }];
     }
     if (!entry.isFile()) return [];
+    if (filters.include.size > 0 && !filters.include.has(relativePath)) return [];
+    if (filters.exclude.has(relativePath)) return [];
     const binary = isBinaryFileSync(absolutePath);
     const content = binary ? 'Binary file' : fs.readFileSync(absolutePath, 'utf8');
     return [{ type: 'file', name: entry.name, path: relativePath, content, binary }];
@@ -98,13 +102,21 @@ function cloneRepository(source) {
   return { repositoryRoot, temporaryRoot };
 }
 
-function renderExplorerRoot(md, explorerRoot, openPath, options) {
-  const tree = readDirectory(explorerRoot);
+function normalizeFilePath(filePath) {
+  return path.posix.normalize(filePath.replaceAll('\\', '/').replace(/^\.\/+/, ''));
+}
+
+function renderExplorerRoot(md, explorerRoot, directives, options) {
+  const include = new Set(directives.addFiles.map(normalizeFilePath));
+  const exclude = new Set(directives.excludeFiles.map(normalizeFilePath));
+  const tree = readDirectory(explorerRoot, { include, exclude, active: include.size > 0 || exclude.size > 0 });
   const files = flattenFiles(tree);
   if (files.length === 0) {
-    return '<div class="mexp mexp--empty" data-mdit-explorer>No text files found.</div>';
+    return '<div class="mexp mexp--empty" data-mdit-explorer>No files found.</div>';
   }
-  const normalizedOpenPath = openPath?.replaceAll('\\', '/');
+  const normalizedOpenPath = directives.defaultOpenPath
+    ? normalizeFilePath(directives.defaultOpenPath)
+    : '';
   const selected = files.find(file => file.path === normalizedOpenPath) || files[0];
   const views = files.map(file => {
     const hidden = file.path === selected.path ? '' : ' hidden';
@@ -121,11 +133,12 @@ function renderExplorerRoot(md, explorerRoot, openPath, options) {
   return `<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer">${renderTree(tree, selected.path)}</nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">${escapeHtml(selected.name)}</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">${escapeHtml(selected.path)}</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="${escapeHtml(selected.path)}" aria-label="Copy code">${icons.copy}</button></div></div><div class="mexp__views">${views}</div></section></div>`;
 }
 
-function renderExplorer(md, source, openPath, options) {
+function renderExplorer(md, directives, options) {
+  const { source } = directives;
   if (isRemoteGitSource(source)) {
     const { repositoryRoot, temporaryRoot } = cloneRepository(source);
     try {
-      return renderExplorerRoot(md, repositoryRoot, openPath, options);
+      return renderExplorerRoot(md, repositoryRoot, directives, options);
     } finally {
       fs.rmSync(temporaryRoot, { recursive: true, force: true });
     }
@@ -140,7 +153,7 @@ function renderExplorer(md, source, openPath, options) {
   if (!fs.statSync(explorerRoot).isDirectory()) {
     throw new Error(`mdit-explorer: not a directory: ${source}`);
   }
-  return renderExplorerRoot(md, explorerRoot, openPath, options);
+  return renderExplorerRoot(md, explorerRoot, directives, options);
 }
 
 function parseInfo(info) {
@@ -158,12 +171,22 @@ export default function explorerPlugin(md, options = {}) {
     if (!source) return false;
 
     let nextLine = startLine + 1;
-    let openPath = '';
+    let defaultOpenPath = '';
+    const addFiles = [];
+    const excludeFiles = [];
     for (; nextLine < endLine; nextLine += 1) {
       const lineStart = state.bMarks[nextLine] + state.tShift[nextLine];
       const line = state.src.slice(lineStart, state.eMarks[nextLine]).trim();
       if (line === ':::') break;
-      if (line.startsWith('open=')) openPath = line.slice(5).trim();
+      if (line.startsWith('defaultopen=')) defaultOpenPath = line.slice('defaultopen='.length).trim();
+      if (line.startsWith('addfile=')) {
+        const filePath = line.slice('addfile='.length).trim();
+        if (filePath) addFiles.push(filePath);
+      }
+      if (line.startsWith('excludefile=')) {
+        const filePath = line.slice('excludefile='.length).trim();
+        if (filePath) excludeFiles.push(filePath);
+      }
     }
     if (nextLine >= endLine) return false;
     if (silent) return true;
@@ -171,7 +194,7 @@ export default function explorerPlugin(md, options = {}) {
     const token = state.push('explorer', '', 0);
     token.block = true;
     token.map = [startLine, nextLine + 1];
-    token.meta = { source, openPath };
+    token.meta = { source, defaultOpenPath, addFiles, excludeFiles };
     state.line = nextLine + 1;
     return true;
   });
@@ -180,6 +203,6 @@ export default function explorerPlugin(md, options = {}) {
     const token = tokens[index];
     const firstExplorer = tokens.findIndex(item => item.type === 'explorer') === index;
     const assets = firstExplorer && options.injectAssets === true ? renderAssets() : '';
-    return `${assets}${renderExplorer(md, token.meta.source, token.meta.openPath, options)}\n`;
+    return `${assets}${renderExplorer(md, token.meta, options)}\n`;
   };
 }

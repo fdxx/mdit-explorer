@@ -5,18 +5,23 @@ A markdown-it plugin, For rendering an embedded code explorer similar to VS Code
 ## In the md file
 ```md
 ::: explorer ./demo
-open=src/main.cpp
+defaultopen=src/main.cpp
+addfile=src/main.cpp
+addfile=src/main.h
+excludefile=src/main.h
 :::
 ```
 
 - `./demo`: The folder to be parsed and scanned.
-- `open`: The file to open by default.
+- `defaultopen`: The file to open by default.
+- `addfile`: Optional. Only render the specified file. Repeat the directive to add multiple files.
+- `excludefile`: Optional. Exclude the specified file. Repeat the directive to exclude multiple files. Exclusions take precedence over additions.
 
 Remote HTTP(S) Git repositories are shallow-cloned while Markdown is rendered:
 
 ```md
 ::: explorer https://github.com/fdxx/mdit-explorer.git
-open=src/index.js
+defaultopen=src/index.js
 :::
 ```
 

@@ -23,7 +23,7 @@ test('renders the tree, highlighted files, and selected file', t => {
   const md = markdownit({ highlight: (code, lang) => `<mark data-lang="${lang}">${code}</mark>` })
     .use(explorer, { root, injectAssets: true });
 
-  const html = md.render('::: explorer .\nopen=src/main.js\n:::\n');
+  const html = md.render('::: explorer .\ndefaultopen=src/main.js\n:::\n');
   assert.match(html, /data-path="src\/main\.js"[^>]+aria-selected="true"|aria-selected="true"[^>]+data-path="src\/main\.js"/);
   assert.match(html, /data-lang="javascript"/);
   assert.match(html, /<code class="hljs language-javascript">/);
@@ -60,6 +60,18 @@ test('can disable line numbers', t => {
   assert.match(html, /mexp__view mexp__view--no-lines/);
 });
 
+test('includes and excludes repeated file directives', t => {
+  const root = fixture();
+  t.after(() => fs.rmSync(root, { recursive: true }));
+  fs.writeFileSync(path.join(root, 'ignored.txt'), 'ignored');
+  const html = markdownit().use(explorer, { root }).render(
+    '::: explorer .\naddfile=src/main.js\naddfile=README.md\nexcludefile=README.md\ndefaultopen=src/main.js\n:::\n'
+  );
+  assert.match(html, /data-path="src\/main\.js"/);
+  assert.doesNotMatch(html, /data-path="README\.md"/);
+  assert.doesNotMatch(html, /data-path="ignored\.txt"/);
+});
+
 test('shows binary files without reading them as text', t => {
   const root = fixture();
   t.after(() => fs.rmSync(root, { recursive: true }));
@@ -68,7 +80,7 @@ test('shows binary files without reading them as text', t => {
   const html = markdownit({ highlight: code => {
     highlighted.push(code);
     return '';
-  } }).use(explorer, { root }).render('::: explorer .\nopen=image.bin\n:::\n');
+  } }).use(explorer, { root }).render('::: explorer .\ndefaultopen=image.bin\n:::\n');
 
   assert.match(html, /data-path="image\.bin"/);
   assert.match(html, /<code class="hljs language-plaintext">Binary file<\/code>/);
@@ -87,7 +99,7 @@ test('renders a shallow-cloned Git repository', t => {
   execFileSync('git', ['-C', repository, '-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'fixture']);
 
   const source = pathToFileURL(repository).href;
-  const html = markdownit().use(explorer).render(`::: explorer ${source}\nopen=src/remote.js\n:::\n`);
+  const html = markdownit().use(explorer).render(`::: explorer ${source}\ndefaultopen=src/remote.js\n:::\n`);
   assert.match(html, /data-path="src\/remote\.js"/);
   assert.match(html, /export const remote = true;/);
   assert.doesNotMatch(html, /data-path="\.git\//);
@@ -110,7 +122,7 @@ test('escapes file contents when no highlighter is configured', t => {
   const root = fixture();
   t.after(() => fs.rmSync(root, { recursive: true }));
   fs.writeFileSync(path.join(root, 'unsafe.html'), '<script>alert(1)</script>');
-  const html = markdownit().use(explorer, { root }).render('::: explorer .\nopen=unsafe.html\n:::\n');
+  const html = markdownit().use(explorer, { root }).render('::: explorer .\ndefaultopen=unsafe.html\n:::\n');
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.doesNotMatch(html, /<code><script>/);
 });

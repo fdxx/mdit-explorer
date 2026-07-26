@@ -16,13 +16,17 @@ const source = `# mdit-explorer
 ## Local directory
 
 ::: explorer ./demo-file
-open=src/gallery.cpp
+defaultopen=src/gallery.cpp
+excludefile=include/ArgsParser.hpp
 :::
 
 ## Remote Git repository
 
 ::: explorer https://github.com/fdxx/mdit-explorer.git
-open=src/index.js
+defaultopen=src/index.js
+addfile=README.md
+addfile=src/index.js
+addfile=src/style.css
 :::
 `;
 
