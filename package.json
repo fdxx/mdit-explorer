@@ -11,6 +11,9 @@
     "type": "git",
     "url": "https://github.com/fdxx/mdit-explorer.git"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "exports": {
     ".": "./src/index.js",
     "./style.css": "./src/style.css",

@@ -27,7 +27,8 @@ test('renders the tree, highlighted files, and selected file', t => {
   assert.match(html, /data-path="src\/main\.js"[^>]+aria-selected="true"|aria-selected="true"[^>]+data-path="src\/main\.js"/);
   assert.match(html, /data-lang="javascript"/);
   assert.match(html, /<code class="hljs language-javascript">/);
-  assert.match(html, /<pre class="mexp__lines" aria-hidden="true">1\n2<\/pre>/);
+  assert.match(html, /data-line-count="2"/);
+  assert.doesNotMatch(html, /<pre class="mexp__lines"/);
   assert.match(html, /data-mdit-explorer-style/);
   assert.match(html, /data-mdit-explorer-script/);
 });
@@ -56,8 +57,7 @@ test('can disable line numbers', t => {
   t.after(() => fs.rmSync(root, { recursive: true }));
   const html = markdownit().use(explorer, { root, lineNumbers: false })
     .render('::: explorer .\n:::\n');
-  assert.doesNotMatch(html, /mexp__lines/);
-  assert.match(html, /mexp__view mexp__view--no-lines/);
+  assert.doesNotMatch(html, /data-line-count/);
 });
 
 test('includes and excludes repeated file directives', t => {
@@ -99,10 +99,22 @@ test('renders a shallow-cloned Git repository', t => {
   execFileSync('git', ['-C', repository, '-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'fixture']);
 
   const source = pathToFileURL(repository).href;
-  const html = markdownit().use(explorer).render(`::: explorer ${source}\ndefaultopen=src/remote.js\n:::\n`);
+  const logs = [];
+  const originalConsoleInfo = console.info;
+  console.info = message => logs.push(message);
+  let html;
+  try {
+    html = markdownit().use(explorer).render(`::: explorer ${source}\ndefaultopen=src/remote.js\n:::\n`);
+  } finally {
+    console.info = originalConsoleInfo;
+  }
   assert.match(html, /data-path="src\/remote\.js"/);
   assert.match(html, /export const remote = true;/);
   assert.doesNotMatch(html, /data-path="\.git\//);
+  assert.deepEqual(logs, [
+    `[mdit-explorer] Cloning repository: ${source}`,
+    `[mdit-explorer] Parsing repository: ${source}`
+  ]);
 });
 
 test('index.js runs without asset files when injection is disabled', async t => {

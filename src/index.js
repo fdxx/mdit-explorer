@@ -86,9 +86,19 @@ function isRemoteGitSource(source) {
   }
 }
 
+function sourceForLog(source) {
+  const url = new URL(source);
+  url.username = '';
+  url.password = '';
+  url.search = '';
+  url.hash = '';
+  return url.href;
+}
+
 function cloneRepository(source) {
   const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mdit-explorer-'));
   const repositoryRoot = path.join(temporaryRoot, 'repository');
+  console.info(`[mdit-explorer] Cloning repository: ${sourceForLog(source)}`);
   try {
     execFileSync('git', ['clone', '--depth', '1', '--quiet', '--', source, repositoryRoot], {
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -122,12 +132,10 @@ function renderExplorerRoot(md, explorerRoot, directives, options) {
     const hidden = file.path === selected.path ? '' : ' hidden';
     const highlighted = highlightFile(md, file);
     const languageClass = highlighted.language ? ` language-${escapeHtml(highlighted.language)}` : '';
-    const showLineNumbers = options.lineNumbers !== false;
-    const viewModifier = showLineNumbers ? '' : ' mexp__view--no-lines';
-    const lineNumbers = showLineNumbers
-      ? `<pre class="mexp__lines" aria-hidden="true">${Array.from({ length: file.content.split('\n').length }, (_, index) => index + 1).join('\n')}</pre>`
-      : '';
-    return `<div class="mexp__view${viewModifier}" data-path="${escapeHtml(file.path)}"${hidden}>${lineNumbers}<pre class="mexp__code"><code class="hljs${languageClass}">${highlighted.html}</code></pre></div>`;
+    const lineCount = options.lineNumbers === false
+      ? ''
+      : ` data-line-count="${file.content.split('\n').length}"`;
+    return `<div class="mexp__view" data-path="${escapeHtml(file.path)}"${lineCount}${hidden}><pre class="mexp__code"><code class="hljs${languageClass}">${highlighted.html}</code></pre></div>`;
   }).join('');
 
   return `<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer">${renderTree(tree, selected.path)}</nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">${escapeHtml(selected.name)}</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">${escapeHtml(selected.path)}</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="${escapeHtml(selected.path)}" aria-label="Copy code">${icons.copy}</button></div></div><div class="mexp__views">${views}</div></section></div>`;
@@ -138,6 +146,7 @@ function renderExplorer(md, directives, options) {
   if (isRemoteGitSource(source)) {
     const { repositoryRoot, temporaryRoot } = cloneRepository(source);
     try {
+      console.info(`[mdit-explorer] Parsing repository: ${sourceForLog(source)}`);
       return renderExplorerRoot(md, repositoryRoot, directives, options);
     } finally {
       fs.rmSync(temporaryRoot, { recursive: true, force: true });

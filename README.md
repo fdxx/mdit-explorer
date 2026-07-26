@@ -48,5 +48,5 @@ const mdrenderer = markdownit({ html: true, highlight })
 ```
 
 - `injectAssets`: Inline `style.css` and `browser.js`. They are injected only once when rendering multiple blocks. Defaults to `false`.
-- `lineNumbers`: Show line numbers in the code area. Defaults to `true`.
+- `lineNumbers`: Show line numbers in the code area. Defaults to `true`; `browser.js` generates them only when a file is viewed for the first time.
 - `root`: Where to start searching the directory. Defaults to `process.cwd()`.
