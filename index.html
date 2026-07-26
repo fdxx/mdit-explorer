@@ -272,7 +272,7 @@
   border-radius: 0;
   color: inherit;
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   height: 100%;
   margin: 0;
   max-height: none;
@@ -287,8 +287,8 @@
   display: none;
 }
 
-.mexp[data-mdit-explorer] .mexp__view--no-lines {
-  grid-template-columns: minmax(0, 1fr);
+.mexp[data-mdit-explorer] .mexp__view--with-lines {
+  grid-template-columns: max-content minmax(0, 1fr);
 }
 
 .mexp[data-mdit-explorer] .mexp__lines,
@@ -365,8 +365,24 @@
   if (window[loaded]) return;
   window[loaded] = true;
 
+  const ensureLineNumbers = view => {
+    if (!view?.dataset.lineCount || view.querySelector('.mexp__lines')) return;
+    const lineCount = Number.parseInt(view.dataset.lineCount, 10);
+    if (!Number.isSafeInteger(lineCount) || lineCount < 1) return;
+
+    const gutter = document.createElement('pre');
+    gutter.className = 'mexp__lines';
+    gutter.setAttribute('aria-hidden', 'true');
+    gutter.textContent = Array.from({ length: lineCount }, (_, index) => index + 1).join('\n');
+    view.prepend(gutter);
+    view.classList.add('mexp__view--with-lines');
+  };
+
   const select = (root, button) => {
     const path = button.dataset.path;
+    const selectedView = [...root.querySelectorAll('.mexp__view')]
+      .find(element => element.dataset.path === path);
+    ensureLineNumbers(selectedView);
     root.querySelectorAll('.mexp__file').forEach(element => {
       element.setAttribute('aria-selected', String(element === button));
     });
@@ -377,6 +393,17 @@
     root.querySelector('.mexp__crumb').textContent = path;
     root.querySelector('.mexp__copy').dataset.path = path;
   };
+
+  const initialize = () => {
+    document.querySelectorAll('.mexp__view[data-line-count]:not([hidden])')
+      .forEach(ensureLineNumbers);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize, { once: true });
+  } else {
+    initialize();
+  }
 
   const copyText = async text => {
     if (navigator.clipboard?.writeText) {
@@ -396,13 +423,16 @@
   document.addEventListener('click', async event => {
     const file = event.target.closest('.mexp__file');
     if (file) {
-      select(file.closest('.mexp'), file);
+      const root = file.closest('[data-mdit-explorer]');
+      if (!root) return;
+      select(root, file);
       return;
     }
 
     const copy = event.target.closest('.mexp__copy');
     if (!copy) return;
-    const root = copy.closest('.mexp');
+    const root = copy.closest('[data-mdit-explorer]');
+    if (!root) return;
     const view = [...root.querySelectorAll('.mexp__view')]
       .find(element => element.dataset.path === copy.dataset.path);
     if (!view) return;
@@ -416,440 +446,7 @@
     }
   });
 })();
-</script><div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">include</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="include/JustifiedLayout.hpp" data-name="JustifiedLayout.hpp" data-ext="hpp" title="include/JustifiedLayout.hpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">JustifiedLayout.hpp</span></button></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/gallery.cpp" data-name="gallery.cpp" data-ext="cpp" title="src/gallery.cpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">gallery.cpp</span></button></li></ul></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">gallery.cpp</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/gallery.cpp</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/gallery.cpp" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="include/JustifiedLayout.hpp" hidden><pre class="mexp__lines" aria-hidden="true">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187
-188
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199
-200
-201
-202
-203
-204
-205
-206
-207
-208
-209
-210
-211
-212
-213
-214
-215
-216
-217
-218
-219
-220
-221
-222
-223
-224
-225
-226
-227
-228
-229
-230
-231
-232
-233
-234
-235
-236
-237
-238
-239
-240
-241
-242
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254
-255
-256
-257
-258
-259
-260
-261
-262
-263
-264
-265
-266
-267
-268
-269
-270
-271
-272
-273
-274
-275
-276
-277
-278
-279
-280
-281
-282
-283
-284
-285
-286
-287
-288
-289
-290
-291
-292
-293
-294
-295
-296
-297
-298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309
-310
-311
-312
-313
-314
-315
-316
-317
-318
-319
-320
-321
-322
-323
-324
-325
-326
-327
-328
-329
-330
-331
-332
-333
-334
-335
-336
-337
-338
-339
-340
-341
-342
-343
-344
-345
-346
-347
-348
-349
-350
-351
-352
-353
-354
-355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378
-379
-380
-381
-382
-383
-384
-385
-386
-387
-388
-389
-390
-391
-392
-393
-394
-395
-396
-397
-398
-399
-400
-401
-402
-403
-404
-405
-406
-407
-408
-409
-410
-411
-412
-413
-414
-415
-416
-417
-418
-419
-420
-421
-422
-423
-424
-425
-426
-427
-428
-429
-430
-431
-432
-433
-434</pre><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+</script><div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">include</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="include/JustifiedLayout.hpp" data-name="JustifiedLayout.hpp" data-ext="hpp" title="include/JustifiedLayout.hpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">JustifiedLayout.hpp</span></button></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/gallery.cpp" data-name="gallery.cpp" data-ext="cpp" title="src/gallery.cpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">gallery.cpp</span></button></li></ul></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">gallery.cpp</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/gallery.cpp</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/gallery.cpp" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="include/JustifiedLayout.hpp" data-line-count="434" hidden><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
 
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;variant&gt;</span></span>
@@ -1282,423 +879,7 @@
 }
 
 } <span class="hljs-comment">// namespace JustifiedLayout</span>
-</code></pre></div><div class="mexp__view" data-path="src/gallery.cpp"><pre class="mexp__lines" aria-hidden="true">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187
-188
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199
-200
-201
-202
-203
-204
-205
-206
-207
-208
-209
-210
-211
-212
-213
-214
-215
-216
-217
-218
-219
-220
-221
-222
-223
-224
-225
-226
-227
-228
-229
-230
-231
-232
-233
-234
-235
-236
-237
-238
-239
-240
-241
-242
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254
-255
-256
-257
-258
-259
-260
-261
-262
-263
-264
-265
-266
-267
-268
-269
-270
-271
-272
-273
-274
-275
-276
-277
-278
-279
-280
-281
-282
-283
-284
-285
-286
-287
-288
-289
-290
-291
-292
-293
-294
-295
-296
-297
-298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309
-310
-311
-312
-313
-314
-315
-316
-317
-318
-319
-320
-321
-322
-323
-324
-325
-326
-327
-328
-329
-330
-331
-332
-333
-334
-335
-336
-337
-338
-339
-340
-341
-342
-343
-344
-345
-346
-347
-348
-349
-350
-351
-352
-353
-354
-355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375
-376
-377
-378
-379
-380
-381
-382
-383
-384
-385
-386
-387
-388
-389
-390
-391
-392
-393
-394
-395
-396
-397
-398
-399
-400
-401
-402
-403
-404
-405
-406
-407
-408
-409
-410
-411
-412
-413
-414
-415
-416
-417</pre><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;ImgSize.hpp&gt;</span></span>
+</code></pre></div><div class="mexp__view" data-path="src/gallery.cpp" data-line-count="417"><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;ImgSize.hpp&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstdio&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;inja.hpp&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;JustifiedLayout.hpp&gt;</span></span>
@@ -2116,215 +1297,7 @@
 
 </code></pre></div></div></section></div>
 <h2>Remote Git repository</h2>
-<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/index.js" data-name="index.js" data-ext="js" title="src/index.js"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">index.js</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="src/style.css" data-name="style.css" data-ext="css" title="src/style.css"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">style.css</span></button></li></ul></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="README.md" data-name="README.md" data-ext="md" title="README.md"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">README.md</span></button></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">index.js</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/index.js</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/index.js" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="src/index.js"><pre class="mexp__lines" aria-hidden="true">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187
-188
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199
-200
-201
-202
-203
-204
-205
-206
-207
-208
-209</pre><pre class="mexp__code"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { execFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:child_process&#x27;</span>;
+<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/index.js" data-name="index.js" data-ext="js" title="src/index.js"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">index.js</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="src/style.css" data-name="style.css" data-ext="css" title="src/style.css"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">style.css</span></button></li></ul></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="README.md" data-name="README.md" data-ext="md" title="README.md"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">README.md</span></button></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">index.js</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/index.js</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/index.js" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="src/index.js" data-line-count="218"><pre class="mexp__code"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { execFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:child_process&#x27;</span>;
 <span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:fs&#x27;</span>;
 <span class="hljs-keyword">import</span> os <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:os&#x27;</span>;
 <span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>;
@@ -2412,9 +1385,19 @@
   }
 }
 
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sourceForLog</span>(<span class="hljs-params">source</span>) {
+  <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(source);
+  url.<span class="hljs-property">username</span> = <span class="hljs-string">&#x27;&#x27;</span>;
+  url.<span class="hljs-property">password</span> = <span class="hljs-string">&#x27;&#x27;</span>;
+  url.<span class="hljs-property">search</span> = <span class="hljs-string">&#x27;&#x27;</span>;
+  url.<span class="hljs-property">hash</span> = <span class="hljs-string">&#x27;&#x27;</span>;
+  <span class="hljs-keyword">return</span> url.<span class="hljs-property">href</span>;
+}
+
 <span class="hljs-keyword">function</span> <span class="hljs-title function_">cloneRepository</span>(<span class="hljs-params">source</span>) {
   <span class="hljs-keyword">const</span> temporaryRoot = fs.<span class="hljs-title function_">mkdtempSync</span>(path.<span class="hljs-title function_">join</span>(os.<span class="hljs-title function_">tmpdir</span>(), <span class="hljs-string">&#x27;mdit-explorer-&#x27;</span>));
   <span class="hljs-keyword">const</span> repositoryRoot = path.<span class="hljs-title function_">join</span>(temporaryRoot, <span class="hljs-string">&#x27;repository&#x27;</span>);
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">info</span>(<span class="hljs-string">`[mdit-explorer] Cloning repository: <span class="hljs-subst">${sourceForLog(source)}</span>`</span>);
   <span class="hljs-keyword">try</span> {
     <span class="hljs-title function_">execFileSync</span>(<span class="hljs-string">&#x27;git&#x27;</span>, [<span class="hljs-string">&#x27;clone&#x27;</span>, <span class="hljs-string">&#x27;--depth&#x27;</span>, <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&#x27;--quiet&#x27;</span>, <span class="hljs-string">&#x27;--&#x27;</span>, source, repositoryRoot], {
       <span class="hljs-attr">stdio</span>: [<span class="hljs-string">&#x27;ignore&#x27;</span>, <span class="hljs-string">&#x27;pipe&#x27;</span>, <span class="hljs-string">&#x27;pipe&#x27;</span>],
@@ -2448,12 +1431,10 @@
     <span class="hljs-keyword">const</span> hidden = file.<span class="hljs-property">path</span> === selected.<span class="hljs-property">path</span> ? <span class="hljs-string">&#x27;&#x27;</span> : <span class="hljs-string">&#x27; hidden&#x27;</span>;
     <span class="hljs-keyword">const</span> highlighted = <span class="hljs-title function_">highlightFile</span>(md, file);
     <span class="hljs-keyword">const</span> languageClass = highlighted.<span class="hljs-property">language</span> ? <span class="hljs-string">` language-<span class="hljs-subst">${escapeHtml(highlighted.language)}</span>`</span> : <span class="hljs-string">&#x27;&#x27;</span>;
-    <span class="hljs-keyword">const</span> showLineNumbers = options.<span class="hljs-property">lineNumbers</span> !== <span class="hljs-literal">false</span>;
-    <span class="hljs-keyword">const</span> viewModifier = showLineNumbers ? <span class="hljs-string">&#x27;&#x27;</span> : <span class="hljs-string">&#x27; mexp__view--no-lines&#x27;</span>;
-    <span class="hljs-keyword">const</span> lineNumbers = showLineNumbers
-      ? <span class="hljs-string">`&lt;pre class=&quot;mexp__lines&quot; aria-hidden=&quot;true&quot;&gt;<span class="hljs-subst">${<span class="hljs-built_in">Array</span>.<span class="hljs-keyword">from</span>({ length: file.content.split(<span class="hljs-string">&#x27;\n&#x27;</span>).length }, (_, index) =&gt; index + <span class="hljs-number">1</span>).join(<span class="hljs-string">&#x27;\n&#x27;</span>)}</span>&lt;/pre&gt;`</span>
-      : <span class="hljs-string">&#x27;&#x27;</span>;
-    <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;div class=&quot;mexp__view<span class="hljs-subst">${viewModifier}</span>&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(file.path)}</span>&quot;<span class="hljs-subst">${hidden}</span>&gt;<span class="hljs-subst">${lineNumbers}</span>&lt;pre class=&quot;mexp__code&quot;&gt;&lt;code class=&quot;hljs<span class="hljs-subst">${languageClass}</span>&quot;&gt;<span class="hljs-subst">${highlighted.html}</span>&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;`</span>;
+    <span class="hljs-keyword">const</span> lineCount = options.<span class="hljs-property">lineNumbers</span> === <span class="hljs-literal">false</span>
+      ? <span class="hljs-string">&#x27;&#x27;</span>
+      : <span class="hljs-string">` data-line-count=&quot;<span class="hljs-subst">${file.content.split(<span class="hljs-string">&#x27;\n&#x27;</span>).length}</span>&quot;`</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;div class=&quot;mexp__view&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(file.path)}</span>&quot;<span class="hljs-subst">${lineCount}</span><span class="hljs-subst">${hidden}</span>&gt;&lt;pre class=&quot;mexp__code&quot;&gt;&lt;code class=&quot;hljs<span class="hljs-subst">${languageClass}</span>&quot;&gt;<span class="hljs-subst">${highlighted.html}</span>&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;`</span>;
   }).<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;&#x27;</span>);
 
   <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;div class=&quot;mexp&quot; data-mdit-explorer&gt;&lt;aside class=&quot;mexp__sidebar&quot;&gt;&lt;div class=&quot;mexp__side-title&quot;&gt;Explorer&lt;/div&gt;&lt;nav class=&quot;mexp__tree&quot; aria-label=&quot;File explorer&quot;&gt;<span class="hljs-subst">${renderTree(tree, selected.path)}</span>&lt;/nav&gt;&lt;/aside&gt;&lt;section class=&quot;mexp__main&quot;&gt;&lt;div class=&quot;mexp__tabbar&quot;&gt;&lt;div class=&quot;mexp__tab&quot;&gt;&lt;span class=&quot;mexp__tab-name&quot;&gt;<span class="hljs-subst">${escapeHtml(selected.name)}</span>&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;mexp__crumbbar&quot;&gt;&lt;span class=&quot;mexp__crumb&quot;&gt;<span class="hljs-subst">${escapeHtml(selected.path)}</span>&lt;/span&gt;&lt;div class=&quot;mexp__actions&quot;&gt;&lt;button class=&quot;mexp__copy&quot; type=&quot;button&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(selected.path)}</span>&quot; aria-label=&quot;Copy code&quot;&gt;<span class="hljs-subst">${icons.copy}</span>&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;mexp__views&quot;&gt;<span class="hljs-subst">${views}</span>&lt;/div&gt;&lt;/section&gt;&lt;/div&gt;`</span>;
@@ -2464,6 +1445,7 @@
   <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRemoteGitSource</span>(source)) {
     <span class="hljs-keyword">const</span> { repositoryRoot, temporaryRoot } = <span class="hljs-title function_">cloneRepository</span>(source);
     <span class="hljs-keyword">try</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">info</span>(<span class="hljs-string">`[mdit-explorer] Parsing repository: <span class="hljs-subst">${sourceForLog(source)}</span>`</span>);
       <span class="hljs-keyword">return</span> <span class="hljs-title function_">renderExplorerRoot</span>(md, repositoryRoot, directives, options);
     } <span class="hljs-keyword">finally</span> {
       fs.<span class="hljs-title function_">rmSync</span>(temporaryRoot, { <span class="hljs-attr">recursive</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">force</span>: <span class="hljs-literal">true</span> });
@@ -2532,346 +1514,7 @@
     <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${assets}</span><span class="hljs-subst">${renderExplorer(md, token.meta, options)}</span>\n`</span>;
   };
 }
-</code></pre></div><div class="mexp__view" data-path="src/style.css" hidden><pre class="mexp__lines" aria-hidden="true">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187
-188
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199
-200
-201
-202
-203
-204
-205
-206
-207
-208
-209
-210
-211
-212
-213
-214
-215
-216
-217
-218
-219
-220
-221
-222
-223
-224
-225
-226
-227
-228
-229
-230
-231
-232
-233
-234
-235
-236
-237
-238
-239
-240
-241
-242
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254
-255
-256
-257
-258
-259
-260
-261
-262
-263
-264
-265
-266
-267
-268
-269
-270
-271
-272
-273
-274
-275
-276
-277
-278
-279
-280
-281
-282
-283
-284
-285
-286
-287
-288
-289
-290
-291
-292
-293
-294
-295
-296
-297
-298
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309
-310
-311
-312
-313
-314
-315
-316
-317
-318
-319
-320
-321
-322
-323
-324
-325
-326
-327
-328
-329
-330
-331
-332
-333
-334
-335
-336
-337
-338
-339
-340</pre><pre class="mexp__code"><code class="hljs language-css"><span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> {
+</code></pre></div><div class="mexp__view" data-path="src/style.css" data-line-count="340" hidden><pre class="mexp__code"><code class="hljs language-css"><span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> {
   <span class="hljs-attr">--mexp-bg</span>: <span class="hljs-number">#fff</span>;
   <span class="hljs-attr">--mexp-side</span>: <span class="hljs-number">#f3f3f3</span>;
   <span class="hljs-attr">--mexp-hover</span>: <span class="hljs-number">#e7e7e7</span>;
@@ -3123,7 +1766,7 @@
   <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">0</span>;
   <span class="hljs-attribute">color</span>: inherit;
   <span class="hljs-attribute">display</span>: grid;
-  <span class="hljs-attribute">grid-template-columns</span>: max-content <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
   <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
   <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
   <span class="hljs-attribute">max-height</span>: none;
@@ -3138,8 +1781,8 @@
   <span class="hljs-attribute">display</span>: none;
 }
 
-<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__view--no-lines</span> {
-  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__view--with-lines</span> {
+  <span class="hljs-attribute">grid-template-columns</span>: max-content <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
 }
 
 <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__lines</span>,
@@ -3210,59 +1853,7 @@
   <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__code</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">12px</span>; }
   <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tab</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">8px</span>; }
 }
-</code></pre></div><div class="mexp__view" data-path="README.md" hidden><pre class="mexp__lines" aria-hidden="true">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53</pre><pre class="mexp__code"><code class="hljs language-markdown"><span class="hljs-section"># mdit-explorer</span>
+</code></pre></div><div class="mexp__view" data-path="README.md" data-line-count="53" hidden><pre class="mexp__code"><code class="hljs language-markdown"><span class="hljs-section"># mdit-explorer</span>
 
 A markdown-it plugin, For rendering an embedded code explorer similar to VS Code style.
 
@@ -3312,7 +1903,7 @@ const mdrenderer = markdownit({ html: true, highlight })
 ```</span>
 
 <span class="hljs-bullet">-</span> <span class="hljs-code">`injectAssets`</span>: Inline <span class="hljs-code">`style.css`</span> and <span class="hljs-code">`browser.js`</span>. They are injected only once when rendering multiple blocks. Defaults to <span class="hljs-code">`false`</span>.
-<span class="hljs-bullet">-</span> <span class="hljs-code">`lineNumbers`</span>: Show line numbers in the code area. Defaults to <span class="hljs-code">`true`</span>.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`lineNumbers`</span>: Show line numbers in the code area. Defaults to <span class="hljs-code">`true`</span>; <span class="hljs-code">`browser.js`</span> generates them only when a file is viewed for the first time.
 <span class="hljs-bullet">-</span> <span class="hljs-code">`root`</span>: Where to start searching the directory. Defaults to <span class="hljs-code">`process.cwd()`</span>.
 </code></pre></div></div></section></div>
 </main>

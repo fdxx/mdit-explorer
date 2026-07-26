@@ -250,7 +250,7 @@
   border-radius: 0;
   color: inherit;
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   height: 100%;
   margin: 0;
   max-height: none;
@@ -265,8 +265,8 @@
   display: none;
 }
 
-.mexp[data-mdit-explorer] .mexp__view--no-lines {
-  grid-template-columns: minmax(0, 1fr);
+.mexp[data-mdit-explorer] .mexp__view--with-lines {
+  grid-template-columns: max-content minmax(0, 1fr);
 }
 
 .mexp[data-mdit-explorer] .mexp__lines,
