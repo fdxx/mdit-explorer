@@ -11,12 +11,14 @@
     body { background: #f6f7f9; color: #242424; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; }
     main { margin: 0 auto; max-width: 1180px; padding: 32px 20px 48px; }
     h1 { font-size: 22px; font-weight: 600; letter-spacing: 0; margin: 0 0 18px; }
+    h2 { font-size: 14px; font-weight: 600; letter-spacing: 0; margin: 28px 0 10px; }
     @media (prefers-color-scheme: dark) { body { background: #121212; color: #d4d4d4; } }
     @media (max-width: 640px) { main { padding: 18px 10px 28px; } h1 { font-size: 19px; margin-left: 2px; } }
   </style>
 </head>
 <body>
   <main><h1>mdit-explorer</h1>
+<h2>Local directory</h2>
 <style data-mdit-explorer-style>
 .mexp[data-mdit-explorer] {
   --mexp-bg: #fff;
@@ -264,15 +266,18 @@
 }
 
 .mexp[data-mdit-explorer] .mexp__view {
+  align-items: start;
   background: transparent;
   border: 0;
   border-radius: 0;
   color: inherit;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
   height: 100%;
   margin: 0;
   max-height: none;
   overflow: auto;
-  padding: 12px 16px;
+  padding: 0;
   scrollbar-color: var(--mexp-scroll) transparent;
   scrollbar-width: thin;
   tab-size: 4;
@@ -282,7 +287,43 @@
   display: none;
 }
 
-.mexp[data-mdit-explorer] .mexp__view code {
+.mexp[data-mdit-explorer] .mexp__view--no-lines {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mexp[data-mdit-explorer] .mexp__lines,
+.mexp[data-mdit-explorer] .mexp__code {
+  border: 0;
+  border-radius: 0;
+  font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  margin: 0;
+  max-height: none;
+  overflow: visible;
+  white-space: pre;
+}
+
+.mexp[data-mdit-explorer] .mexp__lines {
+  background: var(--mexp-code);
+  border-right: 1px solid var(--mexp-border);
+  color: var(--mexp-muted);
+  min-height: 100%;
+  padding: 12px 10px 12px 12px;
+  position: sticky;
+  left: 0;
+  text-align: right;
+  user-select: none;
+  z-index: 1;
+}
+
+.mexp[data-mdit-explorer] .mexp__code {
+  background: var(--mexp-code);
+  box-shadow: none;
+  color: inherit;
+  min-width: max-content;
+  padding: 12px 16px;
+}
+
+.mexp[data-mdit-explorer] .mexp__code code {
   border: 0;
   display: block;
   font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -314,7 +355,8 @@
 
   .mexp[data-mdit-explorer] .mexp__side-title { padding-left: 10px; }
   .mexp[data-mdit-explorer] .mexp__group .mexp__group { padding-left: 8px; }
-  .mexp[data-mdit-explorer] .mexp__view { padding: 10px 12px; }
+  .mexp[data-mdit-explorer] .mexp__lines { padding: 10px 8px 10px 9px; }
+  .mexp[data-mdit-explorer] .mexp__code { padding: 10px 12px; }
   .mexp[data-mdit-explorer] .mexp__tab { padding: 0 8px; }
 }
 </style><script data-mdit-explorer-script>
@@ -366,7 +408,7 @@
     if (!view) return;
 
     try {
-      await copyText(view.textContent);
+      await copyText(view.querySelector('code').textContent);
       copy.setAttribute('aria-label', 'Copied');
       setTimeout(() => copy.setAttribute('aria-label', 'Copy code'), 1200);
     } catch {
@@ -374,299 +416,440 @@
     }
   });
 })();
-</script><div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">assets</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">css</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="assets/css/style.css" data-name="style.css" data-ext="css" title="assets/css/style.css"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">style.css</span></button></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">templates</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="assets/templates/album.html" data-name="album.html" data-ext="html" title="assets/templates/album.html"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">album.html</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="assets/templates/photo.html" data-name="photo.html" data-ext="html" title="assets/templates/photo.html"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">photo.html</span></button></li></ul></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">include</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="include/ArgsParser.hpp" data-name="ArgsParser.hpp" data-ext="hpp" title="include/ArgsParser.hpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">ArgsParser.hpp</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="include/JustifiedLayout.hpp" data-name="JustifiedLayout.hpp" data-ext="hpp" title="include/JustifiedLayout.hpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">JustifiedLayout.hpp</span></button></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/gallery.cpp" data-name="gallery.cpp" data-ext="cpp" title="src/gallery.cpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">gallery.cpp</span></button></li></ul></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path=".gitignore" data-name=".gitignore" data-ext="" title=".gitignore"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">.gitignore</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="README.md" data-name="README.md" data-ext="md" title="README.md"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">README.md</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="xmake.lua" data-name="xmake.lua" data-ext="lua" title="xmake.lua"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">xmake.lua</span></button></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">gallery.cpp</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/gallery.cpp</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/gallery.cpp" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><pre class="mexp__view" data-path="assets/css/style.css" hidden><code class="hljs language-css"><span class="hljs-comment">/* style.css — minimal, easy to extend */</span>
-
-*, *<span class="hljs-selector-pseudo">::before</span>, *<span class="hljs-selector-pseudo">::after</span> { <span class="hljs-attribute">box-sizing</span>: border-box; <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>; <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>; }
-
-<span class="hljs-selector-tag">body</span> {
-  <span class="hljs-attribute">font-family</span>: sans-serif;
-  <span class="hljs-attribute">background</span>: <span class="hljs-number">#f8f8f8</span>;
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#222</span>;
-}
-
-<span class="hljs-comment">/* ── Header &amp; navbar ── */</span>
-<span class="hljs-selector-tag">header</span> {
-  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0.75rem</span> <span class="hljs-number">2rem</span>;
-  <span class="hljs-attribute">background</span>: <span class="hljs-number">#fff</span>;
-  <span class="hljs-attribute">border-bottom</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#e0e0e0</span>;
-}
-
-<span class="hljs-selector-class">.navbar</span> {
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0.82rem</span>;
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#888</span>;
-  <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">0.35rem</span>;
-}
-
-<span class="hljs-selector-class">.navbar</span> <span class="hljs-selector-tag">a</span> {
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#555</span>;
-  <span class="hljs-attribute">text-decoration</span>: none;
-}
-
-<span class="hljs-selector-class">.navbar</span> <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> { <span class="hljs-attribute">text-decoration</span>: underline; }
-
-<span class="hljs-selector-class">.navbar</span> <span class="hljs-selector-class">.sep</span> {
-  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> <span class="hljs-number">0.3rem</span>;
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#bbb</span>;
-}
-
-<span class="hljs-selector-tag">header</span> <span class="hljs-selector-tag">h1</span> {
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">1.3rem</span>;
-  <span class="hljs-attribute">font-weight</span>: <span class="hljs-number">600</span>;
-}
-
-<span class="hljs-selector-tag">header</span> <span class="hljs-selector-class">.photo-count</span> {
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0.85rem</span>;
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#888</span>;
-}
-
-<span class="hljs-selector-tag">main</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">2rem</span>; }
-
-<span class="hljs-comment">/* ── Directory / album grid ── */</span>
-<span class="hljs-selector-class">.entry-list</span> {
-  <span class="hljs-attribute">list-style</span>: none;
-  <span class="hljs-attribute">display</span>: grid;
-  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">repeat</span>(auto-fill, <span class="hljs-built_in">minmax</span>(<span class="hljs-number">200px</span>, <span class="hljs-number">1</span>fr));
-  <span class="hljs-attribute">gap</span>: <span class="hljs-number">1rem</span>;
-}
-
-<span class="hljs-selector-class">.entry-item</span> <span class="hljs-selector-tag">a</span> {
-  <span class="hljs-attribute">display</span>: block;
-  <span class="hljs-attribute">text-decoration</span>: none;
-  <span class="hljs-attribute">color</span>: inherit;
-  <span class="hljs-attribute">background</span>: <span class="hljs-number">#fff</span>;
-  <span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#e0e0e0</span>;
-  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">4px</span>;
-  <span class="hljs-attribute">overflow</span>: hidden;
-}
-
-<span class="hljs-selector-class">.entry-item</span> <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> { <span class="hljs-attribute">border-color</span>: <span class="hljs-number">#aaa</span>; }
-
-<span class="hljs-comment">/* padding-top trick: height = 75% of width = 4:3 ratio, never broken by img */</span>
-<span class="hljs-selector-class">.entry-thumb</span> {
-  <span class="hljs-attribute">position</span>: relative;
-  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
-  <span class="hljs-attribute">padding-top</span>: <span class="hljs-number">75%</span>;
-  <span class="hljs-attribute">background</span>: <span class="hljs-number">#ece8e0</span>;
-  <span class="hljs-attribute">overflow</span>: hidden;
-}
-
-<span class="hljs-selector-class">.entry-thumb</span> <span class="hljs-selector-tag">img</span> {
-  <span class="hljs-attribute">position</span>: absolute;
-  <span class="hljs-attribute">inset</span>: <span class="hljs-number">0</span>;
-  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
-  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
-  <span class="hljs-attribute">object-fit</span>: cover;
-  <span class="hljs-attribute">display</span>: block;
-}
-
-<span class="hljs-selector-class">.entry-thumb</span> <span class="hljs-selector-class">.folder-badge</span> {
-  <span class="hljs-attribute">position</span>: absolute;
-  <span class="hljs-attribute">bottom</span>: <span class="hljs-number">4px</span>;
-  <span class="hljs-attribute">right</span>: <span class="hljs-number">6px</span>;
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">1.3rem</span>;
-  <span class="hljs-attribute">line-height</span>: <span class="hljs-number">1</span>;
-  <span class="hljs-attribute">filter</span>: <span class="hljs-built_in">drop-shadow</span>(<span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">2px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,.<span class="hljs-number">4</span>));
-}
-
-<span class="hljs-selector-class">.entry-thumb</span> <span class="hljs-selector-class">.folder-icon</span> {
-  <span class="hljs-attribute">position</span>: absolute;
-  <span class="hljs-attribute">inset</span>: <span class="hljs-number">0</span>;
-  <span class="hljs-attribute">display</span>: flex;
-  <span class="hljs-attribute">align-items</span>: center;
-  <span class="hljs-attribute">justify-content</span>: center;
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">3rem</span>;
-  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0.6</span>;
-}
-
-<span class="hljs-selector-class">.entry-name</span> {
-  <span class="hljs-attribute">display</span>: block;
-  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0.5rem</span> <span class="hljs-number">0.6rem</span> <span class="hljs-number">0.15rem</span>;
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0.9rem</span>;
-  <span class="hljs-attribute">font-weight</span>: <span class="hljs-number">600</span>;
-  <span class="hljs-attribute">white-space</span>: nowrap;
-  <span class="hljs-attribute">overflow</span>: hidden;
-  <span class="hljs-attribute">text-overflow</span>: ellipsis;
-}
-
-<span class="hljs-selector-class">.entry-count</span> {
-  <span class="hljs-attribute">display</span>: block;
-  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">0.6rem</span> <span class="hljs-number">0.45rem</span>;
-  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0.78rem</span>;
-  <span class="hljs-attribute">color</span>: <span class="hljs-number">#888</span>;
-}
-
-<span class="hljs-comment">/* ── Photo grid ── */</span>
-<span class="hljs-selector-class">.photo-container</span> { <span class="hljs-attribute">position</span>: relative; }
-
-<span class="hljs-selector-class">.photo-link</span> {
-  <span class="hljs-attribute">display</span>: block;
-  <span class="hljs-attribute">overflow</span>: hidden;
-}
-
-<span class="hljs-selector-class">.photo-link</span> <span class="hljs-selector-tag">img</span> { <span class="hljs-attribute">transition</span>: opacity <span class="hljs-number">0.2s</span>; }
-<span class="hljs-selector-class">.photo-link</span><span class="hljs-selector-pseudo">:hover</span> <span class="hljs-selector-tag">img</span> { <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0.88</span>; }</code></pre><pre class="mexp__view" data-path="assets/templates/album.html" hidden><code class="hljs language-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;zh&quot;</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>{{ title }}<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ root }}css/style.css&quot;</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">header</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;navbar&quot;</span>&gt;</span>
-      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ root }}index.html&quot;</span>&gt;</span>Gallery<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-## for crumb in navbar
-      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;sep&quot;</span>&gt;</span>/<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ crumb.url }}&quot;</span>&gt;</span>{{ crumb.name }}<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-## endfor
-    <span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{{ title }}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">main</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;entry-list&quot;</span>&gt;</span>
-## for entry in albums
-      <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;entry-item&quot;</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ entry.url }}&quot;</span>&gt;</span>
-          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;entry-thumb&quot;</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;folder-icon&quot;</span>&gt;</span><span class="hljs-symbol">&amp;#128193;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-          <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;entry-name&quot;</span>&gt;</span>{{ entry.name }}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-          <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;entry-count&quot;</span>&gt;</span>{{ entry.count }} 张<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-      <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
-## endfor
-    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
-</code></pre><pre class="mexp__view" data-path="assets/templates/photo.html" hidden><code class="hljs language-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;zh&quot;</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>{{ title }}<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://cdn.jsdelivr.net/npm/@fancyapps/ui@6.1.14/dist/fancybox/fancybox.css&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ root }}css/style.css&quot;</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">header</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;navbar&quot;</span>&gt;</span>
-      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ root }}index.html&quot;</span>&gt;</span>Gallery<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-## for crumb in navbar
-      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;sep&quot;</span>&gt;</span>/<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ crumb.url }}&quot;</span>&gt;</span>{{ crumb.name }}<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-## endfor
-    <span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{{ title }}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;photo-count&quot;</span>&gt;</span>{{ count }} 张照片<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">main</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;photo-container&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width:{{ containerW }}px; height:{{ containerH }}px;&quot;</span>&gt;</span>
-## for photo in photos
-      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ photo.src }}&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;photo-link&quot;</span> <span class="hljs-attr">data-fancybox</span>=<span class="hljs-string">&quot;gallery&quot;</span>
-        <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;position:absolute; top:{{ photo.top }}px; left:{{ photo.left }}px; width:{{ photo.width }}px; height:{{ photo.height }}px;&quot;</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;{{ photo.src }}&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;{{ photo.name }}&quot;</span> <span class="hljs-attr">loading</span>=<span class="hljs-string">&quot;lazy&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width:100%; height:100%; object-fit:cover; display:block;&quot;</span>&gt;</span>
-      <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-## endfor
-    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://cdn.jsdelivr.net/npm/@fancyapps/ui@6.1.14/dist/fancybox/fancybox.umd.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
-  <span class="hljs-title class_">Fancybox</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-string">&#x27;[data-fancybox]&#x27;</span>, {
-    <span class="hljs-attr">placeFocusBack</span>: <span class="hljs-literal">false</span>,
-    <span class="hljs-title class_">Hash</span>: <span class="hljs-literal">false</span>,
-    <span class="hljs-title class_">Carousel</span>: {
-      <span class="hljs-title class_">Thumbs</span>: <span class="hljs-literal">false</span>,
-      <span class="hljs-title class_">Toolbar</span>: {
-        <span class="hljs-attr">display</span>: {
-          <span class="hljs-attr">middle</span>: [
-            <span class="hljs-string">&quot;zoomIn&quot;</span>,
-            <span class="hljs-string">&quot;zoomOut&quot;</span>,
-            <span class="hljs-string">&quot;toggle1to1&quot;</span>,
-            <span class="hljs-string">&quot;rotateCCW&quot;</span>,
-            <span class="hljs-string">&quot;rotateCW&quot;</span>,
-            <span class="hljs-string">&quot;flipX&quot;</span>,
-            <span class="hljs-string">&quot;flipY&quot;</span>,
-          ],
-        },
-      },
-    }
-  });
-  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
-</code></pre><pre class="mexp__view" data-path="include/ArgsParser.hpp" hidden><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
-
-<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstdint&gt;</span></span>
-<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
-<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
-<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;type_traits&gt;</span></span>
-
-<span class="hljs-keyword">class</span> <span class="hljs-title class_">ArgsParser</span>
-{
-<span class="hljs-keyword">public</span>:
-    <span class="hljs-built_in">ArgsParser</span>(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span>* argv[])
-    {
-        m_CmdName = argv[<span class="hljs-number">0</span>];
-        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>; i &lt; argc; ++i)
-            <span class="hljs-built_in">Parse</span>(argv[i]);
-    }
-
-    <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">Has</span><span class="hljs-params">(std::string_view key)</span> <span class="hljs-type">const</span>
-    </span>{
-        <span class="hljs-keyword">return</span> m_Args.<span class="hljs-built_in">contains</span>(std::<span class="hljs-built_in">string</span>(key));
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
-    T <span class="hljs-title">Get</span><span class="hljs-params">(std::string_view key, T defValue = {})</span> <span class="hljs-type">const</span>
-    </span>{
-        <span class="hljs-keyword">auto</span> it = m_Args.<span class="hljs-built_in">find</span>(std::<span class="hljs-built_in">string</span>(key));
-        <span class="hljs-keyword">if</span> (it == m_Args.<span class="hljs-built_in">end</span>())
-            <span class="hljs-keyword">return</span> defValue;
-        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Convert</span>&lt;T&gt;(it-&gt;second);
-    }
-
-    <span class="hljs-function"><span class="hljs-type">const</span> <span class="hljs-type">char</span> *<span class="hljs-title">GetCmdName</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> m_CmdName.<span class="hljs-built_in">c_str</span>();
-    }
-
-<span class="hljs-keyword">private</span>:
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Parse</span><span class="hljs-params">(std::string_view arg)</span>
-    </span>{
-        <span class="hljs-keyword">auto</span> pos = arg.<span class="hljs-built_in">find</span>(<span class="hljs-string">&#x27;=&#x27;</span>);
-        <span class="hljs-keyword">if</span> (pos == std::string_view::npos)
-        {
-            m_Args[std::<span class="hljs-built_in">string</span>(arg)] = <span class="hljs-string">&quot;true&quot;</span>;
-            <span class="hljs-keyword">return</span>;
-        }
-
-        m_Args[std::<span class="hljs-built_in">string</span>(arg.<span class="hljs-built_in">substr</span>(<span class="hljs-number">0</span>, pos))] = std::<span class="hljs-built_in">string</span>(arg.<span class="hljs-built_in">substr</span>(pos + <span class="hljs-number">1</span>));
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
-    T <span class="hljs-title">Convert</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; str)</span> <span class="hljs-type">const</span>
-    </span>{
-        <span class="hljs-function"><span class="hljs-keyword">if</span> <span class="hljs-title">constexpr</span> <span class="hljs-params">(std::is_same_v&lt;T, std::string&gt;)</span>
-            <span class="hljs-keyword">return</span> str</span>;
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">constexpr</span> (std::is_same_v&lt;T, <span class="hljs-type">int32_t</span>&gt;)
-            <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">stoi</span>(str);
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">constexpr</span> (std::is_same_v&lt;T, <span class="hljs-type">int64_t</span>&gt;)
-            <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">stoll</span>(str);
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">constexpr</span> (std::is_same_v&lt;T, <span class="hljs-type">double</span>&gt;)
-            <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">stod</span>(str);
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">constexpr</span> (std::is_same_v&lt;T, <span class="hljs-type">bool</span>&gt;)
-            <span class="hljs-keyword">return</span> str == <span class="hljs-string">&quot;1&quot;</span> || str == <span class="hljs-string">&quot;true&quot;</span> || str == <span class="hljs-string">&quot;yes&quot;</span> || str == <span class="hljs-string">&quot;on&quot;</span>;
-        <span class="hljs-keyword">else</span> {
-            <span class="hljs-built_in">static_assert</span>(!<span class="hljs-built_in">sizeof</span>(T), <span class="hljs-string">&quot;Unsupported type&quot;</span>);
-        }
-    }
-
-    std::string m_CmdName;
-    std::unordered_map&lt;std::string, std::string&gt; m_Args;
-};
-</code></pre><pre class="mexp__view" data-path="include/JustifiedLayout.hpp" hidden><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+</script><div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">include</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="include/JustifiedLayout.hpp" data-name="JustifiedLayout.hpp" data-ext="hpp" title="include/JustifiedLayout.hpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">JustifiedLayout.hpp</span></button></li></ul></li><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/gallery.cpp" data-name="gallery.cpp" data-ext="cpp" title="src/gallery.cpp"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">gallery.cpp</span></button></li></ul></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">gallery.cpp</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/gallery.cpp</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/gallery.cpp" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="include/JustifiedLayout.hpp" hidden><pre class="mexp__lines" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434</pre><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
 
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;variant&gt;</span></span>
@@ -1099,7 +1282,423 @@
 }
 
 } <span class="hljs-comment">// namespace JustifiedLayout</span>
-</code></pre><pre class="mexp__view" data-path="src/gallery.cpp"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;ImgSize.hpp&gt;</span></span>
+</code></pre></div><div class="mexp__view" data-path="src/gallery.cpp"><pre class="mexp__lines" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417</pre><pre class="mexp__code"><code class="hljs language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;ImgSize.hpp&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstdio&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;inja.hpp&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;JustifiedLayout.hpp&gt;</span></span>
@@ -1515,69 +2114,1207 @@
 }
 
 
-</code></pre><pre class="mexp__view" data-path=".gitignore" hidden><code class="hljs">.vscode<span class="hljs-symbol">/</span>
-release<span class="hljs-symbol">/</span>
-build<span class="hljs-symbol">/</span>
-.xmake<span class="hljs-symbol">/</span>
-.cache<span class="hljs-symbol">/</span>
-compile_commands.json
-core
-public<span class="hljs-symbol">/</span>
-gallery
-.filecount
-</code></pre><pre class="mexp__view" data-path="README.md" hidden><code class="hljs language-markdown"><span class="hljs-section"># Photo Gallery Generator</span>
+</code></pre></div></div></section></div>
+<h2>Remote Git repository</h2>
+<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer"><ul class="mexp__group" role="group"><li class="mexp__item"><div class="mexp__folder"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z"/></svg></span><span class="mexp__name">src</span></div><ul class="mexp__group" role="group"><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="true" data-path="src/index.js" data-name="index.js" data-ext="js" title="src/index.js"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">index.js</span></button></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="src/style.css" data-name="style.css" data-ext="css" title="src/style.css"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">style.css</span></button></li></ul></li><li class="mexp__item"><button class="mexp__file" type="button" role="treeitem" aria-selected="false" data-path="README.md" data-name="README.md" data-ext="md" title="README.md"><span class="mexp__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z"/></svg></span><span class="mexp__name">README.md</span></button></li></ul></nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">index.js</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">src/index.js</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="src/index.js" aria-label="Copy code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z"/></svg></button></div></div><div class="mexp__views"><div class="mexp__view" data-path="src/index.js"><pre class="mexp__lines" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209</pre><pre class="mexp__code"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { execFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:child_process&#x27;</span>;
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:fs&#x27;</span>;
+<span class="hljs-keyword">import</span> os <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:os&#x27;</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>;
+<span class="hljs-keyword">import</span> { isBinaryFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;isbinaryfile&#x27;</span>;
 
-Scan an image folder to generate static HTML pages.
+<span class="hljs-keyword">const</span> languageByExtension = {
+  <span class="hljs-attr">c</span>: <span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-attr">cc</span>: <span class="hljs-string">&#x27;cpp&#x27;</span>, <span class="hljs-attr">cpp</span>: <span class="hljs-string">&#x27;cpp&#x27;</span>, <span class="hljs-attr">cxx</span>: <span class="hljs-string">&#x27;cpp&#x27;</span>, <span class="hljs-attr">h</span>: <span class="hljs-string">&#x27;cpp&#x27;</span>, <span class="hljs-attr">hpp</span>: <span class="hljs-string">&#x27;cpp&#x27;</span>,
+  <span class="hljs-attr">css</span>: <span class="hljs-string">&#x27;css&#x27;</span>, <span class="hljs-attr">html</span>: <span class="hljs-string">&#x27;html&#x27;</span>, <span class="hljs-attr">htm</span>: <span class="hljs-string">&#x27;html&#x27;</span>, <span class="hljs-attr">js</span>: <span class="hljs-string">&#x27;javascript&#x27;</span>, <span class="hljs-attr">cjs</span>: <span class="hljs-string">&#x27;javascript&#x27;</span>,
+  <span class="hljs-attr">mjs</span>: <span class="hljs-string">&#x27;javascript&#x27;</span>, <span class="hljs-attr">json</span>: <span class="hljs-string">&#x27;json&#x27;</span>, <span class="hljs-attr">jsx</span>: <span class="hljs-string">&#x27;jsx&#x27;</span>, <span class="hljs-attr">lua</span>: <span class="hljs-string">&#x27;lua&#x27;</span>, <span class="hljs-attr">md</span>: <span class="hljs-string">&#x27;markdown&#x27;</span>,
+  <span class="hljs-attr">py</span>: <span class="hljs-string">&#x27;python&#x27;</span>, <span class="hljs-attr">rb</span>: <span class="hljs-string">&#x27;ruby&#x27;</span>, <span class="hljs-attr">rs</span>: <span class="hljs-string">&#x27;rust&#x27;</span>, <span class="hljs-attr">sh</span>: <span class="hljs-string">&#x27;bash&#x27;</span>, <span class="hljs-attr">bash</span>: <span class="hljs-string">&#x27;bash&#x27;</span>, <span class="hljs-attr">sql</span>: <span class="hljs-string">&#x27;sql&#x27;</span>,
+  <span class="hljs-attr">ts</span>: <span class="hljs-string">&#x27;typescript&#x27;</span>, <span class="hljs-attr">tsx</span>: <span class="hljs-string">&#x27;tsx&#x27;</span>, <span class="hljs-attr">txt</span>: <span class="hljs-string">&#x27;plaintext&#x27;</span>, <span class="hljs-attr">xml</span>: <span class="hljs-string">&#x27;xml&#x27;</span>, <span class="hljs-attr">yml</span>: <span class="hljs-string">&#x27;yaml&#x27;</span>, <span class="hljs-attr">yaml</span>: <span class="hljs-string">&#x27;yaml&#x27;</span>
+};
 
-<span class="hljs-section">## Usage</span>
-<span class="hljs-code">```bash
-Usage: ./gallery -src=dir -out=dir [-update=0] [-maxw=1800] [-maxh=500] [-assets=assets] [-webroot=/]
+<span class="hljs-keyword">const</span> icons = {
+  <span class="hljs-attr">folder</span>: <span class="hljs-string">&#x27;&lt;svg viewBox=&quot;0 0 24 24&quot; aria-hidden=&quot;true&quot;&gt;&lt;path fill=&quot;currentColor&quot; d=&quot;M3 5.5A1.5 1.5 0 0 1 4.5 4H9l2 2h8.5A1.5 1.5 0 0 1 21 7.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-12Z&quot;/&gt;&lt;/svg&gt;&#x27;</span>,
+  <span class="hljs-attr">file</span>: <span class="hljs-string">&#x27;&lt;svg viewBox=&quot;0 0 24 24&quot; aria-hidden=&quot;true&quot;&gt;&lt;path fill=&quot;currentColor&quot; d=&quot;M6 2h8l5 5v15H6V2Zm8 2.2V8h3.8L14 4.2ZM8 4v16h9V10h-5V4H8Z&quot;/&gt;&lt;/svg&gt;&#x27;</span>,
+  <span class="hljs-attr">copy</span>: <span class="hljs-string">&#x27;&lt;svg viewBox=&quot;0 0 24 24&quot; aria-hidden=&quot;true&quot;&gt;&lt;path fill=&quot;currentColor&quot; d=&quot;M9 8h11v13H9V8Zm2 2v9h7v-9h-7ZM4 3h11v3h-2V5H6v9h1v2H4V3Z&quot;/&gt;&lt;/svg&gt;&#x27;</span>
+};
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">escapeHtml</span>(<span class="hljs-params">value</span>) {
+  <span class="hljs-keyword">return</span> value.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/[&amp;&lt;&gt;&quot;&#x27;]/g</span>, <span class="hljs-function"><span class="hljs-params">char</span> =&gt;</span> ({ <span class="hljs-string">&#x27;&amp;&#x27;</span>: <span class="hljs-string">&#x27;&amp;amp;&#x27;</span>, <span class="hljs-string">&#x27;&lt;&#x27;</span>: <span class="hljs-string">&#x27;&amp;lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&#x27;</span>: <span class="hljs-string">&#x27;&amp;gt;&#x27;</span>, <span class="hljs-string">&#x27;&quot;&#x27;</span>: <span class="hljs-string">&#x27;&amp;quot;&#x27;</span>, <span class="hljs-string">&quot;&#x27;&quot;</span>: <span class="hljs-string">&#x27;&amp;#39;&#x27;</span> })[char]);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderAssets</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> stylesheet = fs.<span class="hljs-title function_">readFileSync</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./style.css&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>), <span class="hljs-string">&#x27;utf8&#x27;</span>);
+  <span class="hljs-keyword">const</span> browserScript = fs.<span class="hljs-title function_">readFileSync</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./browser.js&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>), <span class="hljs-string">&#x27;utf8&#x27;</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;style data-mdit-explorer-style&gt;\n<span class="hljs-subst">${stylesheet}</span>&lt;/style&gt;&lt;script data-mdit-explorer-script&gt;\n<span class="hljs-subst">${browserScript}</span>&lt;/script&gt;`</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">readDirectory</span>(<span class="hljs-params">root, filters, current = root</span>) {
+  <span class="hljs-keyword">const</span> entries = fs.<span class="hljs-title function_">readdirSync</span>(current, { <span class="hljs-attr">withFileTypes</span>: <span class="hljs-literal">true</span> })
+    .<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">entry</span> =&gt;</span> entry.<span class="hljs-property">name</span> !== <span class="hljs-string">&#x27;.git&#x27;</span> &amp;&amp; !entry.<span class="hljs-title function_">isSymbolicLink</span>())
+    .<span class="hljs-title function_">sort</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (a.<span class="hljs-title function_">isDirectory</span>() !== b.<span class="hljs-title function_">isDirectory</span>()) <span class="hljs-keyword">return</span> a.<span class="hljs-title function_">isDirectory</span>() ? -<span class="hljs-number">1</span> : <span class="hljs-number">1</span>;
+      <span class="hljs-keyword">return</span> a.<span class="hljs-property">name</span>.<span class="hljs-title function_">localeCompare</span>(b.<span class="hljs-property">name</span>, <span class="hljs-string">&#x27;en&#x27;</span>);
+    });
+
+  <span class="hljs-keyword">return</span> entries.<span class="hljs-title function_">flatMap</span>(<span class="hljs-function"><span class="hljs-params">entry</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> absolutePath = path.<span class="hljs-title function_">join</span>(current, entry.<span class="hljs-property">name</span>);
+    <span class="hljs-keyword">const</span> relativePath = path.<span class="hljs-title function_">relative</span>(root, absolutePath).<span class="hljs-title function_">split</span>(path.<span class="hljs-property">sep</span>).<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;/&#x27;</span>);
+    <span class="hljs-keyword">if</span> (entry.<span class="hljs-title function_">isDirectory</span>()) {
+      <span class="hljs-keyword">const</span> children = <span class="hljs-title function_">readDirectory</span>(root, filters, absolutePath);
+      <span class="hljs-keyword">if</span> (filters.<span class="hljs-property">active</span> &amp;&amp; children.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> [];
+      <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;directory&#x27;</span>, <span class="hljs-attr">name</span>: entry.<span class="hljs-property">name</span>, <span class="hljs-attr">path</span>: relativePath, children }];
+    }
+    <span class="hljs-keyword">if</span> (!entry.<span class="hljs-title function_">isFile</span>()) <span class="hljs-keyword">return</span> [];
+    <span class="hljs-keyword">if</span> (filters.<span class="hljs-property">include</span>.<span class="hljs-property">size</span> &gt; <span class="hljs-number">0</span> &amp;&amp; !filters.<span class="hljs-property">include</span>.<span class="hljs-title function_">has</span>(relativePath)) <span class="hljs-keyword">return</span> [];
+    <span class="hljs-keyword">if</span> (filters.<span class="hljs-property">exclude</span>.<span class="hljs-title function_">has</span>(relativePath)) <span class="hljs-keyword">return</span> [];
+    <span class="hljs-keyword">const</span> binary = <span class="hljs-title function_">isBinaryFileSync</span>(absolutePath);
+    <span class="hljs-keyword">const</span> content = binary ? <span class="hljs-string">&#x27;Binary file&#x27;</span> : fs.<span class="hljs-title function_">readFileSync</span>(absolutePath, <span class="hljs-string">&#x27;utf8&#x27;</span>);
+    <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;file&#x27;</span>, <span class="hljs-attr">name</span>: entry.<span class="hljs-property">name</span>, <span class="hljs-attr">path</span>: relativePath, content, binary }];
+  });
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">flattenFiles</span>(<span class="hljs-params">nodes</span>) {
+  <span class="hljs-keyword">return</span> nodes.<span class="hljs-title function_">flatMap</span>(<span class="hljs-function"><span class="hljs-params">node</span> =&gt;</span> node.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;file&#x27;</span> ? [node] : <span class="hljs-title function_">flattenFiles</span>(node.<span class="hljs-property">children</span>));
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderTree</span>(<span class="hljs-params">nodes, selectedPath</span>) {
+  <span class="hljs-keyword">const</span> items = nodes.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">node</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (node.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;directory&#x27;</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;li class=&quot;mexp__item&quot;&gt;&lt;div class=&quot;mexp__folder&quot;&gt;&lt;span class=&quot;mexp__icon&quot;&gt;<span class="hljs-subst">${icons.folder}</span>&lt;/span&gt;&lt;span class=&quot;mexp__name&quot;&gt;<span class="hljs-subst">${escapeHtml(node.name)}</span>&lt;/span&gt;&lt;/div&gt;<span class="hljs-subst">${renderTree(node.children, selectedPath)}</span>&lt;/li&gt;`</span>;
+    }
+    <span class="hljs-keyword">const</span> extension = path.<span class="hljs-title function_">extname</span>(node.<span class="hljs-property">name</span>).<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">toLowerCase</span>();
+    <span class="hljs-keyword">const</span> selected = node.<span class="hljs-property">path</span> === selectedPath;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;li class=&quot;mexp__item&quot;&gt;&lt;button class=&quot;mexp__file&quot; type=&quot;button&quot; role=&quot;treeitem&quot; aria-selected=&quot;<span class="hljs-subst">${selected}</span>&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(node.path)}</span>&quot; data-name=&quot;<span class="hljs-subst">${escapeHtml(node.name)}</span>&quot; data-ext=&quot;<span class="hljs-subst">${escapeHtml(extension)}</span>&quot; title=&quot;<span class="hljs-subst">${escapeHtml(node.path)}</span>&quot;&gt;&lt;span class=&quot;mexp__icon&quot;&gt;<span class="hljs-subst">${icons.file}</span>&lt;/span&gt;&lt;span class=&quot;mexp__name&quot;&gt;<span class="hljs-subst">${escapeHtml(node.name)}</span>&lt;/span&gt;&lt;/button&gt;&lt;/li&gt;`</span>;
+  }).<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;&#x27;</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;ul class=&quot;mexp__group&quot; role=&quot;group&quot;&gt;<span class="hljs-subst">${items}</span>&lt;/ul&gt;`</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">highlightFile</span>(<span class="hljs-params">md, file</span>) {
+  <span class="hljs-keyword">const</span> extension = path.<span class="hljs-title function_">extname</span>(file.<span class="hljs-property">name</span>).<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">toLowerCase</span>();
+  <span class="hljs-keyword">const</span> language = file.<span class="hljs-property">binary</span> ? <span class="hljs-string">&#x27;plaintext&#x27;</span> : languageByExtension[extension] || extension;
+  <span class="hljs-keyword">const</span> highlighted = !file.<span class="hljs-property">binary</span> &amp;&amp; <span class="hljs-keyword">typeof</span> md.<span class="hljs-property">options</span>.<span class="hljs-property">highlight</span> === <span class="hljs-string">&#x27;function&#x27;</span>
+    ? md.<span class="hljs-property">options</span>.<span class="hljs-title function_">highlight</span>(file.<span class="hljs-property">content</span>, language, <span class="hljs-string">&#x27;&#x27;</span>)
+    : <span class="hljs-string">&#x27;&#x27;</span>;
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">html</span>: highlighted || <span class="hljs-title function_">escapeHtml</span>(file.<span class="hljs-property">content</span>), language };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isRemoteGitSource</span>(<span class="hljs-params">source</span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> [<span class="hljs-string">&#x27;http:&#x27;</span>, <span class="hljs-string">&#x27;https:&#x27;</span>, <span class="hljs-string">&#x27;file:&#x27;</span>].<span class="hljs-title function_">includes</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(source).<span class="hljs-property">protocol</span>);
+  } <span class="hljs-keyword">catch</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">cloneRepository</span>(<span class="hljs-params">source</span>) {
+  <span class="hljs-keyword">const</span> temporaryRoot = fs.<span class="hljs-title function_">mkdtempSync</span>(path.<span class="hljs-title function_">join</span>(os.<span class="hljs-title function_">tmpdir</span>(), <span class="hljs-string">&#x27;mdit-explorer-&#x27;</span>));
+  <span class="hljs-keyword">const</span> repositoryRoot = path.<span class="hljs-title function_">join</span>(temporaryRoot, <span class="hljs-string">&#x27;repository&#x27;</span>);
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">execFileSync</span>(<span class="hljs-string">&#x27;git&#x27;</span>, [<span class="hljs-string">&#x27;clone&#x27;</span>, <span class="hljs-string">&#x27;--depth&#x27;</span>, <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&#x27;--quiet&#x27;</span>, <span class="hljs-string">&#x27;--&#x27;</span>, source, repositoryRoot], {
+      <span class="hljs-attr">stdio</span>: [<span class="hljs-string">&#x27;ignore&#x27;</span>, <span class="hljs-string">&#x27;pipe&#x27;</span>, <span class="hljs-string">&#x27;pipe&#x27;</span>],
+      <span class="hljs-attr">timeout</span>: <span class="hljs-number">120000</span>
+    });
+  } <span class="hljs-keyword">catch</span> (error) {
+    fs.<span class="hljs-title function_">rmSync</span>(temporaryRoot, { <span class="hljs-attr">recursive</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">force</span>: <span class="hljs-literal">true</span> });
+    <span class="hljs-keyword">const</span> detail = error.<span class="hljs-property">stderr</span>?.<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">trim</span>() || error.<span class="hljs-property">message</span>;
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`mdit-explorer: failed to clone repository: <span class="hljs-subst">${detail}</span>`</span>, { <span class="hljs-attr">cause</span>: error });
+  }
+  <span class="hljs-keyword">return</span> { repositoryRoot, temporaryRoot };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">normalizeFilePath</span>(<span class="hljs-params">filePath</span>) {
+  <span class="hljs-keyword">return</span> path.<span class="hljs-property">posix</span>.<span class="hljs-title function_">normalize</span>(filePath.<span class="hljs-title function_">replaceAll</span>(<span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;/&#x27;</span>).<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/^\.\/+/</span>, <span class="hljs-string">&#x27;&#x27;</span>));
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderExplorerRoot</span>(<span class="hljs-params">md, explorerRoot, directives, options</span>) {
+  <span class="hljs-keyword">const</span> include = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(directives.<span class="hljs-property">addFiles</span>.<span class="hljs-title function_">map</span>(normalizeFilePath));
+  <span class="hljs-keyword">const</span> exclude = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(directives.<span class="hljs-property">excludeFiles</span>.<span class="hljs-title function_">map</span>(normalizeFilePath));
+  <span class="hljs-keyword">const</span> tree = <span class="hljs-title function_">readDirectory</span>(explorerRoot, { include, exclude, <span class="hljs-attr">active</span>: include.<span class="hljs-property">size</span> &gt; <span class="hljs-number">0</span> || exclude.<span class="hljs-property">size</span> &gt; <span class="hljs-number">0</span> });
+  <span class="hljs-keyword">const</span> files = <span class="hljs-title function_">flattenFiles</span>(tree);
+  <span class="hljs-keyword">if</span> (files.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;&lt;div class=&quot;mexp mexp--empty&quot; data-mdit-explorer&gt;No files found.&lt;/div&gt;&#x27;</span>;
+  }
+  <span class="hljs-keyword">const</span> normalizedOpenPath = directives.<span class="hljs-property">defaultOpenPath</span>
+    ? <span class="hljs-title function_">normalizeFilePath</span>(directives.<span class="hljs-property">defaultOpenPath</span>)
+    : <span class="hljs-string">&#x27;&#x27;</span>;
+  <span class="hljs-keyword">const</span> selected = files.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> file.<span class="hljs-property">path</span> === normalizedOpenPath) || files[<span class="hljs-number">0</span>];
+  <span class="hljs-keyword">const</span> views = files.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> hidden = file.<span class="hljs-property">path</span> === selected.<span class="hljs-property">path</span> ? <span class="hljs-string">&#x27;&#x27;</span> : <span class="hljs-string">&#x27; hidden&#x27;</span>;
+    <span class="hljs-keyword">const</span> highlighted = <span class="hljs-title function_">highlightFile</span>(md, file);
+    <span class="hljs-keyword">const</span> languageClass = highlighted.<span class="hljs-property">language</span> ? <span class="hljs-string">` language-<span class="hljs-subst">${escapeHtml(highlighted.language)}</span>`</span> : <span class="hljs-string">&#x27;&#x27;</span>;
+    <span class="hljs-keyword">const</span> showLineNumbers = options.<span class="hljs-property">lineNumbers</span> !== <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">const</span> viewModifier = showLineNumbers ? <span class="hljs-string">&#x27;&#x27;</span> : <span class="hljs-string">&#x27; mexp__view--no-lines&#x27;</span>;
+    <span class="hljs-keyword">const</span> lineNumbers = showLineNumbers
+      ? <span class="hljs-string">`&lt;pre class=&quot;mexp__lines&quot; aria-hidden=&quot;true&quot;&gt;<span class="hljs-subst">${<span class="hljs-built_in">Array</span>.<span class="hljs-keyword">from</span>({ length: file.content.split(<span class="hljs-string">&#x27;\n&#x27;</span>).length }, (_, index) =&gt; index + <span class="hljs-number">1</span>).join(<span class="hljs-string">&#x27;\n&#x27;</span>)}</span>&lt;/pre&gt;`</span>
+      : <span class="hljs-string">&#x27;&#x27;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;div class=&quot;mexp__view<span class="hljs-subst">${viewModifier}</span>&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(file.path)}</span>&quot;<span class="hljs-subst">${hidden}</span>&gt;<span class="hljs-subst">${lineNumbers}</span>&lt;pre class=&quot;mexp__code&quot;&gt;&lt;code class=&quot;hljs<span class="hljs-subst">${languageClass}</span>&quot;&gt;<span class="hljs-subst">${highlighted.html}</span>&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;`</span>;
+  }).<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;&#x27;</span>);
+
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`&lt;div class=&quot;mexp&quot; data-mdit-explorer&gt;&lt;aside class=&quot;mexp__sidebar&quot;&gt;&lt;div class=&quot;mexp__side-title&quot;&gt;Explorer&lt;/div&gt;&lt;nav class=&quot;mexp__tree&quot; aria-label=&quot;File explorer&quot;&gt;<span class="hljs-subst">${renderTree(tree, selected.path)}</span>&lt;/nav&gt;&lt;/aside&gt;&lt;section class=&quot;mexp__main&quot;&gt;&lt;div class=&quot;mexp__tabbar&quot;&gt;&lt;div class=&quot;mexp__tab&quot;&gt;&lt;span class=&quot;mexp__tab-name&quot;&gt;<span class="hljs-subst">${escapeHtml(selected.name)}</span>&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;mexp__crumbbar&quot;&gt;&lt;span class=&quot;mexp__crumb&quot;&gt;<span class="hljs-subst">${escapeHtml(selected.path)}</span>&lt;/span&gt;&lt;div class=&quot;mexp__actions&quot;&gt;&lt;button class=&quot;mexp__copy&quot; type=&quot;button&quot; data-path=&quot;<span class="hljs-subst">${escapeHtml(selected.path)}</span>&quot; aria-label=&quot;Copy code&quot;&gt;<span class="hljs-subst">${icons.copy}</span>&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;mexp__views&quot;&gt;<span class="hljs-subst">${views}</span>&lt;/div&gt;&lt;/section&gt;&lt;/div&gt;`</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderExplorer</span>(<span class="hljs-params">md, directives, options</span>) {
+  <span class="hljs-keyword">const</span> { source } = directives;
+  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRemoteGitSource</span>(source)) {
+    <span class="hljs-keyword">const</span> { repositoryRoot, temporaryRoot } = <span class="hljs-title function_">cloneRepository</span>(source);
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-title function_">renderExplorerRoot</span>(md, repositoryRoot, directives, options);
+    } <span class="hljs-keyword">finally</span> {
+      fs.<span class="hljs-title function_">rmSync</span>(temporaryRoot, { <span class="hljs-attr">recursive</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">force</span>: <span class="hljs-literal">true</span> });
+    }
+  }
+
+  <span class="hljs-keyword">const</span> baseDir = path.<span class="hljs-title function_">resolve</span>(options.<span class="hljs-property">root</span> || process.<span class="hljs-title function_">cwd</span>());
+  <span class="hljs-keyword">const</span> explorerRoot = path.<span class="hljs-title function_">resolve</span>(baseDir, source);
+  <span class="hljs-keyword">const</span> relativeToBase = path.<span class="hljs-title function_">relative</span>(baseDir, explorerRoot);
+  <span class="hljs-keyword">if</span> (relativeToBase.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;..&#x27;</span>) || path.<span class="hljs-title function_">isAbsolute</span>(relativeToBase)) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`mdit-explorer: directory is outside root: <span class="hljs-subst">${source}</span>`</span>);
+  }
+  <span class="hljs-keyword">if</span> (!fs.<span class="hljs-title function_">statSync</span>(explorerRoot).<span class="hljs-title function_">isDirectory</span>()) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`mdit-explorer: not a directory: <span class="hljs-subst">${source}</span>`</span>);
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">renderExplorerRoot</span>(md, explorerRoot, directives, options);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseInfo</span>(<span class="hljs-params">info</span>) {
+  <span class="hljs-keyword">const</span> match = info.<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^explorer(?:\s+(.+))?$/</span>);
+  <span class="hljs-keyword">return</span> match?.[<span class="hljs-number">1</span>]?.<span class="hljs-title function_">trim</span>() || <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">explorerPlugin</span>(<span class="hljs-params">md, options = {}</span>) {
+  md.<span class="hljs-property">block</span>.<span class="hljs-property">ruler</span>.<span class="hljs-title function_">before</span>(<span class="hljs-string">&#x27;fence&#x27;</span>, <span class="hljs-string">&#x27;explorer&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">state, startLine, endLine, silent</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> start = state.<span class="hljs-property">bMarks</span>[startLine] + state.<span class="hljs-property">tShift</span>[startLine];
+    <span class="hljs-keyword">const</span> max = state.<span class="hljs-property">eMarks</span>[startLine];
+    <span class="hljs-keyword">const</span> marker = state.<span class="hljs-property">src</span>.<span class="hljs-title function_">slice</span>(start, max);
+    <span class="hljs-keyword">if</span> (!marker.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;:::&#x27;</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">const</span> source = <span class="hljs-title function_">parseInfo</span>(marker.<span class="hljs-title function_">slice</span>(<span class="hljs-number">3</span>));
+    <span class="hljs-keyword">if</span> (!source) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+
+    <span class="hljs-keyword">let</span> nextLine = startLine + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> defaultOpenPath = <span class="hljs-string">&#x27;&#x27;</span>;
+    <span class="hljs-keyword">const</span> addFiles = [];
+    <span class="hljs-keyword">const</span> excludeFiles = [];
+    <span class="hljs-keyword">for</span> (; nextLine &lt; endLine; nextLine += <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">const</span> lineStart = state.<span class="hljs-property">bMarks</span>[nextLine] + state.<span class="hljs-property">tShift</span>[nextLine];
+      <span class="hljs-keyword">const</span> line = state.<span class="hljs-property">src</span>.<span class="hljs-title function_">slice</span>(lineStart, state.<span class="hljs-property">eMarks</span>[nextLine]).<span class="hljs-title function_">trim</span>();
+      <span class="hljs-keyword">if</span> (line === <span class="hljs-string">&#x27;:::&#x27;</span>) <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">if</span> (line.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;defaultopen=&#x27;</span>)) defaultOpenPath = line.<span class="hljs-title function_">slice</span>(<span class="hljs-string">&#x27;defaultopen=&#x27;</span>.<span class="hljs-property">length</span>).<span class="hljs-title function_">trim</span>();
+      <span class="hljs-keyword">if</span> (line.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;addfile=&#x27;</span>)) {
+        <span class="hljs-keyword">const</span> filePath = line.<span class="hljs-title function_">slice</span>(<span class="hljs-string">&#x27;addfile=&#x27;</span>.<span class="hljs-property">length</span>).<span class="hljs-title function_">trim</span>();
+        <span class="hljs-keyword">if</span> (filePath) addFiles.<span class="hljs-title function_">push</span>(filePath);
+      }
+      <span class="hljs-keyword">if</span> (line.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;excludefile=&#x27;</span>)) {
+        <span class="hljs-keyword">const</span> filePath = line.<span class="hljs-title function_">slice</span>(<span class="hljs-string">&#x27;excludefile=&#x27;</span>.<span class="hljs-property">length</span>).<span class="hljs-title function_">trim</span>();
+        <span class="hljs-keyword">if</span> (filePath) excludeFiles.<span class="hljs-title function_">push</span>(filePath);
+      }
+    }
+    <span class="hljs-keyword">if</span> (nextLine &gt;= endLine) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (silent) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+
+    <span class="hljs-keyword">const</span> token = state.<span class="hljs-title function_">push</span>(<span class="hljs-string">&#x27;explorer&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-number">0</span>);
+    token.<span class="hljs-property">block</span> = <span class="hljs-literal">true</span>;
+    token.<span class="hljs-property">map</span> = [startLine, nextLine + <span class="hljs-number">1</span>];
+    token.<span class="hljs-property">meta</span> = { source, defaultOpenPath, addFiles, excludeFiles };
+    state.<span class="hljs-property">line</span> = nextLine + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+  });
+
+  md.<span class="hljs-property">renderer</span>.<span class="hljs-property">rules</span>.<span class="hljs-property">explorer</span> = <span class="hljs-function">(<span class="hljs-params">tokens, index</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> token = tokens[index];
+    <span class="hljs-keyword">const</span> firstExplorer = tokens.<span class="hljs-title function_">findIndex</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;explorer&#x27;</span>) === index;
+    <span class="hljs-keyword">const</span> assets = firstExplorer &amp;&amp; options.<span class="hljs-property">injectAssets</span> === <span class="hljs-literal">true</span> ? <span class="hljs-title function_">renderAssets</span>() : <span class="hljs-string">&#x27;&#x27;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${assets}</span><span class="hljs-subst">${renderExplorer(md, token.meta, options)}</span>\n`</span>;
+  };
+}
+</code></pre></div><div class="mexp__view" data-path="src/style.css" hidden><pre class="mexp__lines" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340</pre><pre class="mexp__code"><code class="hljs language-css"><span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> {
+  <span class="hljs-attr">--mexp-bg</span>: <span class="hljs-number">#fff</span>;
+  <span class="hljs-attr">--mexp-side</span>: <span class="hljs-number">#f3f3f3</span>;
+  <span class="hljs-attr">--mexp-hover</span>: <span class="hljs-number">#e7e7e7</span>;
+  <span class="hljs-attr">--mexp-active</span>: <span class="hljs-number">#d9e8f7</span>;
+  <span class="hljs-attr">--mexp-border</span>: <span class="hljs-number">#d4d4d4</span>;
+  <span class="hljs-attr">--mexp-text</span>: <span class="hljs-number">#242424</span>;
+  <span class="hljs-attr">--mexp-muted</span>: <span class="hljs-number">#616161</span>;
+  <span class="hljs-attr">--mexp-accent</span>: <span class="hljs-number">#0078d4</span>;
+  <span class="hljs-attr">--mexp-code</span>: <span class="hljs-number">#fff</span>;
+  <span class="hljs-attr">--mexp-scroll</span>: <span class="hljs-number">#c1c1c1</span>;
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-bg);
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">6px</span>;
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-text);
+  <span class="hljs-attribute">display</span>: grid;
+  <span class="hljs-attribute">font</span>: <span class="hljs-number">13px</span>/<span class="hljs-number">1.45</span> -apple-system, BlinkMacSystemFont, <span class="hljs-string">&quot;Segoe UI&quot;</span>, sans-serif;
+  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">minmax</span>(<span class="hljs-number">180px</span>, <span class="hljs-number">24%</span>) <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+  <span class="hljs-attribute">height</span>: <span class="hljs-built_in">min</span>(<span class="hljs-number">680px</span>, <span class="hljs-number">75vh</span>);
+  <span class="hljs-attribute">min-height</span>: <span class="hljs-number">380px</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+  <span class="hljs-attribute">text-align</span>: left;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> * {
+  <span class="hljs-attribute">box-sizing</span>: border-box;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span><span class="hljs-selector-class">.mexp--empty</span> {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">height</span>: auto;
+  <span class="hljs-attribute">min-height</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">16px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__sidebar</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-side);
+  <span class="hljs-attribute">border-right</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">flex-direction</span>: column;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__side-title</span> {
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-muted);
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">11px</span>;
+  <span class="hljs-attribute">font-weight</span>: <span class="hljs-number">600</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">14px</span> <span class="hljs-number">7px</span>;
+  <span class="hljs-attribute">text-transform</span>: uppercase;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tree</span> {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">overflow</span>: auto;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">6px</span> <span class="hljs-number">12px</span>;
+  <span class="hljs-attribute">scrollbar-color</span>: <span class="hljs-built_in">var</span>(--mexp-scroll) transparent;
+  <span class="hljs-attribute">scrollbar-width</span>: thin;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__group</span> {
+  <span class="hljs-attribute">list-style</span>: none;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__group</span> <span class="hljs-selector-class">.mexp__group</span> {
+  <span class="hljs-attribute">padding-left</span>: <span class="hljs-number">14px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__folder</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">font-weight</span>: <span class="hljs-number">600</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">24px</span>;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">5px</span>;
+  <span class="hljs-attribute">white-space</span>: nowrap;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__item</span> {
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">appearance</span>: none;
+  <span class="hljs-attribute">background</span>: transparent;
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">3px</span>;
+  <span class="hljs-attribute">color</span>: inherit;
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">font</span>: inherit;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">24px</span>;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">6px</span>;
+  <span class="hljs-attribute">text-align</span>: left;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-pseudo">:hover</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-hover);
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-attr">[aria-selected=<span class="hljs-string">&quot;true&quot;</span>]</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-active);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-text);
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__name</span> {
+  <span class="hljs-attribute">overflow</span>: hidden;
+  <span class="hljs-attribute">text-overflow</span>: ellipsis;
+  <span class="hljs-attribute">white-space</span>: nowrap;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__icon</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">display</span>: inline-flex;
+  <span class="hljs-attribute">flex</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">16px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">16px</span>;
+  <span class="hljs-attribute">justify-content</span>: center;
+  <span class="hljs-attribute">margin-right</span>: <span class="hljs-number">5px</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">16px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__icon</span> <span class="hljs-selector-tag">svg</span> {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">14px</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">14px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__folder</span> &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#d7a216</span>; }
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span> &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#6a737d</span>; }
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-pseudo">:is</span>(<span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;cpp&quot;</span>]</span>, <span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;cc&quot;</span>]</span>, <span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;h&quot;</span>]</span>) &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#519aba</span>; }
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;md&quot;</span>]</span> &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#4169a1</span>; }
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-pseudo">:is</span>(<span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;yml&quot;</span>]</span>, <span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;yaml&quot;</span>]</span>) &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#cb171e</span>; }
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__file</span><span class="hljs-selector-attr">[data-ext=<span class="hljs-string">&quot;lua&quot;</span>]</span> &gt; <span class="hljs-selector-class">.mexp__icon</span> { <span class="hljs-attribute">color</span>: <span class="hljs-number">#4c70ba</span>; }
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__main</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-code);
+  <span class="hljs-attribute">display</span>: grid;
+  <span class="hljs-attribute">grid-template-rows</span>: <span class="hljs-number">36px</span> <span class="hljs-number">28px</span> <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tabbar</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-side);
+  <span class="hljs-attribute">border-bottom</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tab</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-code);
+  <span class="hljs-attribute">border-right</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">border-top</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-accent);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">12px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tab-name</span>,
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__crumb</span> {
+  <span class="hljs-attribute">overflow</span>: hidden;
+  <span class="hljs-attribute">text-overflow</span>: ellipsis;
+  <span class="hljs-attribute">white-space</span>: nowrap;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__crumbbar</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">border-bottom</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-muted);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">gap</span>: <span class="hljs-number">2px</span>;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">8px</span> <span class="hljs-number">0</span> <span class="hljs-number">12px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__actions</span> {
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">margin-left</span>: auto;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span> {
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">appearance</span>: none;
+  <span class="hljs-attribute">background</span>: transparent;
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">3px</span>;
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-muted);
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">font</span>: inherit;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">24px</span>;
+  <span class="hljs-attribute">justify-content</span>: center;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">28px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span><span class="hljs-selector-pseudo">:hover</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-hover);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-text);
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span> <span class="hljs-selector-tag">svg</span> {
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">15px</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">15px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span><span class="hljs-selector-pseudo">::after</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-number">#252526</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">3px</span>;
+  <span class="hljs-attribute">color</span>: <span class="hljs-number">#fff</span>;
+  <span class="hljs-attribute">content</span>: <span class="hljs-built_in">attr</span>(aria-label);
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">11px</span>;
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">3px</span> <span class="hljs-number">6px</span>;
+  <span class="hljs-attribute">pointer-events</span>: none;
+  <span class="hljs-attribute">position</span>: absolute;
+  <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">top</span>: <span class="hljs-number">28px</span>;
+  <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">2px</span>);
+  <span class="hljs-attribute">transition</span>: opacity .<span class="hljs-number">12s</span>, transform .<span class="hljs-number">12s</span>;
+  <span class="hljs-attribute">white-space</span>: nowrap;
+  <span class="hljs-attribute">z-index</span>: <span class="hljs-number">3</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span><span class="hljs-selector-pseudo">:hover</span><span class="hljs-selector-pseudo">::after</span>,
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__copy</span><span class="hljs-selector-pseudo">:focus-visible</span><span class="hljs-selector-pseudo">::after</span> {
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+  <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">0</span>);
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__views</span> {
+  <span class="hljs-attribute">min-height</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+  <span class="hljs-attribute">position</span>: relative;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__view</span> {
+  <span class="hljs-attribute">align-items</span>: start;
+  <span class="hljs-attribute">background</span>: transparent;
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">color</span>: inherit;
+  <span class="hljs-attribute">display</span>: grid;
+  <span class="hljs-attribute">grid-template-columns</span>: max-content <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">max-height</span>: none;
+  <span class="hljs-attribute">overflow</span>: auto;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">scrollbar-color</span>: <span class="hljs-built_in">var</span>(--mexp-scroll) transparent;
+  <span class="hljs-attribute">scrollbar-width</span>: thin;
+  <span class="hljs-attribute">tab-size</span>: <span class="hljs-number">4</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__view</span><span class="hljs-selector-attr">[hidden]</span> {
+  <span class="hljs-attribute">display</span>: none;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__view--no-lines</span> {
+  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__lines</span>,
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__code</span> {
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">font</span>: <span class="hljs-number">13px</span>/<span class="hljs-number">1.55</span> <span class="hljs-string">&quot;SFMono-Regular&quot;</span>, Consolas, <span class="hljs-string">&quot;Liberation Mono&quot;</span>, Menlo, monospace;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">max-height</span>: none;
+  <span class="hljs-attribute">overflow</span>: visible;
+  <span class="hljs-attribute">white-space</span>: pre;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__lines</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-code);
+  <span class="hljs-attribute">border-right</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--mexp-border);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--mexp-muted);
+  <span class="hljs-attribute">min-height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">12px</span> <span class="hljs-number">10px</span> <span class="hljs-number">12px</span> <span class="hljs-number">12px</span>;
+  <span class="hljs-attribute">position</span>: sticky;
+  <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">text-align</span>: right;
+  <span class="hljs-attribute">user-select</span>: none;
+  <span class="hljs-attribute">z-index</span>: <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__code</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--mexp-code);
+  <span class="hljs-attribute">box-shadow</span>: none;
+  <span class="hljs-attribute">color</span>: inherit;
+  <span class="hljs-attribute">min-width</span>: max-content;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">12px</span> <span class="hljs-number">16px</span>;
+}
+
+<span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__code</span> <span class="hljs-selector-tag">code</span> {
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">font</span>: <span class="hljs-number">13px</span>/<span class="hljs-number">1.55</span> <span class="hljs-string">&quot;SFMono-Regular&quot;</span>, Consolas, <span class="hljs-string">&quot;Liberation Mono&quot;</span>, Menlo, monospace;
+  <span class="hljs-attribute">min-width</span>: max-content;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">white-space</span>: pre;
+}
+
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">prefers-color-scheme</span>: dark) {
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> {
+    <span class="hljs-attr">--mexp-bg</span>: <span class="hljs-number">#1e1e1e</span>;
+    <span class="hljs-attr">--mexp-side</span>: <span class="hljs-number">#181818</span>;
+    <span class="hljs-attr">--mexp-hover</span>: <span class="hljs-number">#2a2d2e</span>;
+    <span class="hljs-attr">--mexp-active</span>: <span class="hljs-number">#37373d</span>;
+    <span class="hljs-attr">--mexp-border</span>: <span class="hljs-number">#2b2b2b</span>;
+    <span class="hljs-attr">--mexp-text</span>: <span class="hljs-number">#ccc</span>;
+    <span class="hljs-attr">--mexp-muted</span>: <span class="hljs-number">#9d9d9d</span>;
+    <span class="hljs-attr">--mexp-code</span>: <span class="hljs-number">#1e1e1e</span>;
+    <span class="hljs-attr">--mexp-scroll</span>: <span class="hljs-number">#424242</span>;
+  }
+}
+
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">640px</span>) {
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> {
+    <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-built_in">minmax</span>(<span class="hljs-number">124px</span>, <span class="hljs-number">38%</span>) <span class="hljs-built_in">minmax</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>fr);
+    <span class="hljs-attribute">height</span>: <span class="hljs-number">70vh</span>;
+    <span class="hljs-attribute">min-height</span>: <span class="hljs-number">360px</span>;
+  }
+
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__side-title</span> { <span class="hljs-attribute">padding-left</span>: <span class="hljs-number">10px</span>; }
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__group</span> <span class="hljs-selector-class">.mexp__group</span> { <span class="hljs-attribute">padding-left</span>: <span class="hljs-number">8px</span>; }
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__lines</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">8px</span> <span class="hljs-number">10px</span> <span class="hljs-number">9px</span>; }
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__code</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">12px</span>; }
+  <span class="hljs-selector-class">.mexp</span><span class="hljs-selector-attr">[data-mdit-explorer]</span> <span class="hljs-selector-class">.mexp__tab</span> { <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">8px</span>; }
+}
+</code></pre></div><div class="mexp__view" data-path="README.md" hidden><pre class="mexp__lines" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53</pre><pre class="mexp__code"><code class="hljs language-markdown"><span class="hljs-section"># mdit-explorer</span>
+
+A markdown-it plugin, For rendering an embedded code explorer similar to VS Code style.
+
+<span class="hljs-section">## In the md file</span>
+<span class="hljs-code">```md
+::: explorer ./demo
+defaultopen=src/main.cpp
+addfile=src/main.cpp
+addfile=src/main.h
+excludefile=src/main.h
+:::
 ```</span>
 
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-src`</span>: Source folder for images. Symbolic links will be created in the output folder.
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-out`</span>: Output folder for web files. You will need to use <span class="hljs-code">`nginx`</span> or similar tools for display.
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-update`</span>: Interval for updating the site, in seconds. If the output folder is empty or the number of source files changes, the site will be automatically rebuilt. Default is 0 (disabled).
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-maxw`</span>: Maximum image width. Default is 1800
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-maxh`</span>: Maximum image height. Default is 500
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-assets`</span>: Website resource files, including CSS, website template files, etc. These will be copied to the website root directory when the site is generated. The default is <span class="hljs-code">`assets`</span>, which is the runtime environment directory.
-<span class="hljs-bullet">-</span> <span class="hljs-code">`-webroot`</span>: The website&#x27;s root directory; the default is <span class="hljs-code">`/`</span>. This is particularly useful when the website is located in a subdirectory.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`./demo`</span>: The folder to be parsed and scanned.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`defaultopen`</span>: The file to open by default.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`addfile`</span>: Optional. Only render the specified file. Repeat the directive to add multiple files.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`excludefile`</span>: Optional. Exclude the specified file. Repeat the directive to exclude multiple files. Exclusions take precedence over additions.
 
-<span class="hljs-section">## Requirements</span>
-<span class="hljs-bullet">-</span> Linux
-<span class="hljs-bullet">-</span> C++23
-<span class="hljs-bullet">-</span> Clang
+Remote HTTP(S) Git repositories are shallow-cloned while Markdown is rendered:
 
-<span class="hljs-section">## Build</span>
-
-<span class="hljs-code">```bash
-xmake f -c 
-xmake -rv gallery
-## Check the release folder.
+<span class="hljs-code">```md
+::: explorer https://github.com/fdxx/mdit-explorer.git
+defaultopen=src/index.js
+:::
 ```</span>
-</code></pre><pre class="mexp__view" data-path="xmake.lua" hidden><code class="hljs language-lua">target(<span class="hljs-string">&quot;gallery&quot;</span>)
-    set_kind(<span class="hljs-string">&quot;binary&quot;</span>)
-    set_languages(<span class="hljs-string">&quot;cxx23&quot;</span>)
-    set_arch(<span class="hljs-string">&quot;x64&quot;</span>)
-    set_toolchains(<span class="hljs-string">&quot;clang&quot;</span>)
-    add_includedirs(<span class="hljs-string">&quot;include&quot;</span>)
-    add_files(<span class="hljs-string">&quot;src/gallery.cpp&quot;</span>)
-    add_cxflags(
-        <span class="hljs-string">&quot;-Wall&quot;</span>, 
-        <span class="hljs-string">&quot;-Wshadow&quot;</span>,
-        <span class="hljs-string">&quot;-Wno-parentheses-equality&quot;</span>,
-        <span class="hljs-string">&quot;-fvisibility=hidden&quot;</span>, 
-        <span class="hljs-string">&quot;-fvisibility-inlines-hidden&quot;</span>, 
-        <span class="hljs-string">&quot;-O2&quot;</span>, <span class="hljs-string">&quot;-g3&quot;</span>
-    )
 
-    after_build(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(target)</span></span>
-        <span class="hljs-built_in">os</span>.tryrm(<span class="hljs-string">&quot;release&quot;</span>)
-        <span class="hljs-built_in">os</span>.mkdir(<span class="hljs-string">&quot;release&quot;</span>)
-        <span class="hljs-built_in">os</span>.cp(target:targetfile(), <span class="hljs-string">&quot;release&quot;</span>)
-        <span class="hljs-built_in">os</span>.cp(<span class="hljs-string">&quot;assets&quot;</span>, <span class="hljs-string">&quot;release&quot;</span>)
-    <span class="hljs-keyword">end</span>)
+The generated HTML contains the repository files and does not access Git at runtime. Binary files remain visible in the tree and display <span class="hljs-code">`Binary file`</span> instead of their contents.
 
-</code></pre></div></section></div>
+
+<span class="hljs-section">## Use in markdown-it</span>
+<span class="hljs-code">```js
+import markdownit from &#x27;markdown-it&#x27;;
+import hljs from &#x27;highlight.js&#x27;;
+import explorer from &#x27;mdit-explorer&#x27;;
+
+const mdrenderer = markdownit({ html: true, highlight })
+  .use(explorer)
+```</span>
+
+<span class="hljs-section">## Plugin Options</span>
+
+<span class="hljs-code">```js
+import explorer from &#x27;mdit-explorer&#x27;;
+
+const mdrenderer = markdownit({ html: true, highlight })
+  .use(explorer, { injectAssets: false, lineNumbers: true, root: &#x27;path/to&#x27; })
+```</span>
+
+<span class="hljs-bullet">-</span> <span class="hljs-code">`injectAssets`</span>: Inline <span class="hljs-code">`style.css`</span> and <span class="hljs-code">`browser.js`</span>. They are injected only once when rendering multiple blocks. Defaults to <span class="hljs-code">`false`</span>.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`lineNumbers`</span>: Show line numbers in the code area. Defaults to <span class="hljs-code">`true`</span>.
+<span class="hljs-bullet">-</span> <span class="hljs-code">`root`</span>: Where to start searching the directory. Defaults to <span class="hljs-code">`process.cwd()`</span>.
+</code></pre></div></div></section></div>
 </main>
 </body>
 </html>
