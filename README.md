@@ -29,9 +29,9 @@ const mdrenderer = markdownit({ html: true, highlight })
 import explorer from 'mdit-explorer';
 
 const mdrenderer = markdownit({ html: true, highlight })
-  .use(explorer, { injectAssets: false, root: 'path/to' })
+  .use(explorer, { injectAssets: false, lineNumbers: true, root: 'path/to' })
 ```
 
 - `injectAssets`: Inline `style.css` and `browser.js`. They are injected only once when rendering multiple blocks. Defaults to `false`.
+- `lineNumbers`: Show line numbers in the code area. Defaults to `true`.
 - `root`: Where to start searching the directory. Defaults to `process.cwd()`.
-

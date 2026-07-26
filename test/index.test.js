@@ -25,6 +25,7 @@ test('renders the tree, highlighted files, and selected file', t => {
   assert.match(html, /data-path="src\/main\.js"[^>]+aria-selected="true"|aria-selected="true"[^>]+data-path="src\/main\.js"/);
   assert.match(html, /data-lang="javascript"/);
   assert.match(html, /<code class="hljs language-javascript">/);
+  assert.match(html, /<pre class="mexp__lines" aria-hidden="true">1\n2<\/pre>/);
   assert.match(html, /data-mdit-explorer-style/);
   assert.match(html, /data-mdit-explorer-script/);
 });
@@ -46,6 +47,15 @@ test('omits inline assets by default for host-managed integration', t => {
   assert.doesNotMatch(html, /data-mdit-explorer-style/);
   assert.doesNotMatch(html, /data-mdit-explorer-script/);
   assert.match(html, /data-mdit-explorer/);
+});
+
+test('can disable line numbers', t => {
+  const root = fixture();
+  t.after(() => fs.rmSync(root, { recursive: true }));
+  const html = markdownit().use(explorer, { root, lineNumbers: false })
+    .render('::: explorer .\n:::\n');
+  assert.doesNotMatch(html, /mexp__lines/);
+  assert.match(html, /mexp__view mexp__view--no-lines/);
 });
 
 test('index.js runs without asset files when injection is disabled', async t => {

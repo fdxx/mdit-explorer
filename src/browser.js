@@ -46,7 +46,7 @@
     if (!view) return;
 
     try {
-      await copyText(view.textContent);
+      await copyText(view.querySelector('code').textContent);
       copy.setAttribute('aria-label', 'Copied');
       setTimeout(() => copy.setAttribute('aria-label', 'Copy code'), 1200);
     } catch {
