@@ -13,8 +13,16 @@ function highlight(code, lang) {
 
 const source = `# mdit-explorer
 
+## Local directory
+
 ::: explorer ./demo-file
 open=src/gallery.cpp
+:::
+
+## Remote Git repository
+
+::: explorer https://github.com/fdxx/mdit-explorer.git
+open=src/index.js
 :::
 `;
 
@@ -34,6 +42,7 @@ const page = `<!doctype html>
     body { background: #f6f7f9; color: #242424; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; }
     main { margin: 0 auto; max-width: 1180px; padding: 32px 20px 48px; }
     h1 { font-size: 22px; font-weight: 600; letter-spacing: 0; margin: 0 0 18px; }
+    h2 { font-size: 14px; font-weight: 600; letter-spacing: 0; margin: 28px 0 10px; }
     @media (prefers-color-scheme: dark) { body { background: #121212; color: #d4d4d4; } }
     @media (max-width: 640px) { main { padding: 18px 10px 28px; } h1 { font-size: 19px; margin-left: 2px; } }
   </style>

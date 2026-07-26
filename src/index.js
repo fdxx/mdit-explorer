@@ -1,5 +1,8 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { isBinaryFileSync } from 'isbinaryfile';
 
 const languageByExtension = {
   c: 'c', cc: 'cpp', cpp: 'cpp', cxx: 'cpp', h: 'cpp', hpp: 'cpp',
@@ -27,7 +30,7 @@ function renderAssets() {
 
 function readDirectory(root, current = root) {
   const entries = fs.readdirSync(current, { withFileTypes: true })
-    .filter(entry => !entry.isSymbolicLink())
+    .filter(entry => entry.name !== '.git' && !entry.isSymbolicLink())
     .sort((a, b) => {
       if (a.isDirectory() !== b.isDirectory()) return a.isDirectory() ? -1 : 1;
       return a.name.localeCompare(b.name, 'en');
@@ -40,9 +43,9 @@ function readDirectory(root, current = root) {
       return [{ type: 'directory', name: entry.name, path: relativePath, children: readDirectory(root, absolutePath) }];
     }
     if (!entry.isFile()) return [];
-    const content = fs.readFileSync(absolutePath, 'utf8');
-    if (content.includes('\0')) return [];
-    return [{ type: 'file', name: entry.name, path: relativePath, content }];
+    const binary = isBinaryFileSync(absolutePath);
+    const content = binary ? 'Binary file' : fs.readFileSync(absolutePath, 'utf8');
+    return [{ type: 'file', name: entry.name, path: relativePath, content, binary }];
   });
 }
 
@@ -64,24 +67,38 @@ function renderTree(nodes, selectedPath) {
 
 function highlightFile(md, file) {
   const extension = path.extname(file.name).slice(1).toLowerCase();
-  const language = languageByExtension[extension] || extension;
-  const highlighted = typeof md.options.highlight === 'function'
+  const language = file.binary ? 'plaintext' : languageByExtension[extension] || extension;
+  const highlighted = !file.binary && typeof md.options.highlight === 'function'
     ? md.options.highlight(file.content, language, '')
     : '';
   return { html: highlighted || escapeHtml(file.content), language };
 }
 
-function renderExplorer(md, source, openPath, options) {
-  const baseDir = path.resolve(options.root || process.cwd());
-  const explorerRoot = path.resolve(baseDir, source);
-  const relativeToBase = path.relative(baseDir, explorerRoot);
-  if (relativeToBase.startsWith('..') || path.isAbsolute(relativeToBase)) {
-    throw new Error(`mdit-explorer: directory is outside root: ${source}`);
+function isRemoteGitSource(source) {
+  try {
+    return ['http:', 'https:', 'file:'].includes(new URL(source).protocol);
+  } catch {
+    return false;
   }
-  if (!fs.statSync(explorerRoot).isDirectory()) {
-    throw new Error(`mdit-explorer: not a directory: ${source}`);
-  }
+}
 
+function cloneRepository(source) {
+  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mdit-explorer-'));
+  const repositoryRoot = path.join(temporaryRoot, 'repository');
+  try {
+    execFileSync('git', ['clone', '--depth', '1', '--quiet', '--', source, repositoryRoot], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 120000
+    });
+  } catch (error) {
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    const detail = error.stderr?.toString().trim() || error.message;
+    throw new Error(`mdit-explorer: failed to clone repository: ${detail}`, { cause: error });
+  }
+  return { repositoryRoot, temporaryRoot };
+}
+
+function renderExplorerRoot(md, explorerRoot, openPath, options) {
   const tree = readDirectory(explorerRoot);
   const files = flattenFiles(tree);
   if (files.length === 0) {
@@ -102,6 +119,28 @@ function renderExplorer(md, source, openPath, options) {
   }).join('');
 
   return `<div class="mexp" data-mdit-explorer><aside class="mexp__sidebar"><div class="mexp__side-title">Explorer</div><nav class="mexp__tree" aria-label="File explorer">${renderTree(tree, selected.path)}</nav></aside><section class="mexp__main"><div class="mexp__tabbar"><div class="mexp__tab"><span class="mexp__tab-name">${escapeHtml(selected.name)}</span></div></div><div class="mexp__crumbbar"><span class="mexp__crumb">${escapeHtml(selected.path)}</span><div class="mexp__actions"><button class="mexp__copy" type="button" data-path="${escapeHtml(selected.path)}" aria-label="Copy code">${icons.copy}</button></div></div><div class="mexp__views">${views}</div></section></div>`;
+}
+
+function renderExplorer(md, source, openPath, options) {
+  if (isRemoteGitSource(source)) {
+    const { repositoryRoot, temporaryRoot } = cloneRepository(source);
+    try {
+      return renderExplorerRoot(md, repositoryRoot, openPath, options);
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  }
+
+  const baseDir = path.resolve(options.root || process.cwd());
+  const explorerRoot = path.resolve(baseDir, source);
+  const relativeToBase = path.relative(baseDir, explorerRoot);
+  if (relativeToBase.startsWith('..') || path.isAbsolute(relativeToBase)) {
+    throw new Error(`mdit-explorer: directory is outside root: ${source}`);
+  }
+  if (!fs.statSync(explorerRoot).isDirectory()) {
+    throw new Error(`mdit-explorer: not a directory: ${source}`);
+  }
+  return renderExplorerRoot(md, explorerRoot, openPath, options);
 }
 
 function parseInfo(info) {

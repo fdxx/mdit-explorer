@@ -12,6 +12,16 @@ open=src/main.cpp
 - `./demo`: The folder to be parsed and scanned.
 - `open`: The file to open by default.
 
+Remote HTTP(S) Git repositories are shallow-cloned while Markdown is rendered:
+
+```md
+::: explorer https://github.com/fdxx/mdit-explorer.git
+open=src/index.js
+:::
+```
+
+The generated HTML contains the repository files and does not access Git at runtime. Binary files remain visible in the tree and display `Binary file` instead of their contents.
+
 
 ## Use in markdown-it
 ```js

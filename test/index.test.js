@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { pathToFileURL } from 'node:url';
 import markdownit from 'markdown-it';
 import explorer from '../src/index.js';
 import { script } from '../src/assets.js';
@@ -58,9 +60,42 @@ test('can disable line numbers', t => {
   assert.match(html, /mexp__view mexp__view--no-lines/);
 });
 
+test('shows binary files without reading them as text', t => {
+  const root = fixture();
+  t.after(() => fs.rmSync(root, { recursive: true }));
+  fs.writeFileSync(path.join(root, 'image.bin'), Buffer.from([0, 1, 2, 3, 255, 0]));
+  const highlighted = [];
+  const html = markdownit({ highlight: code => {
+    highlighted.push(code);
+    return '';
+  } }).use(explorer, { root }).render('::: explorer .\nopen=image.bin\n:::\n');
+
+  assert.match(html, /data-path="image\.bin"/);
+  assert.match(html, /<code class="hljs language-plaintext">Binary file<\/code>/);
+  assert.ok(!highlighted.includes('Binary file'));
+});
+
+test('renders a shallow-cloned Git repository', t => {
+  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mdit-explorer-git-'));
+  const repository = path.join(temporaryRoot, 'fixture.git');
+  t.after(() => fs.rmSync(temporaryRoot, { recursive: true }));
+  fs.mkdirSync(repository);
+  execFileSync('git', ['init', '--quiet', repository]);
+  fs.mkdirSync(path.join(repository, 'src'));
+  fs.writeFileSync(path.join(repository, 'src', 'remote.js'), 'export const remote = true;\n');
+  execFileSync('git', ['-C', repository, 'add', '.']);
+  execFileSync('git', ['-C', repository, '-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'fixture']);
+
+  const source = pathToFileURL(repository).href;
+  const html = markdownit().use(explorer).render(`::: explorer ${source}\nopen=src/remote.js\n:::\n`);
+  assert.match(html, /data-path="src\/remote\.js"/);
+  assert.match(html, /export const remote = true;/);
+  assert.doesNotMatch(html, /data-path="\.git\//);
+});
+
 test('index.js runs without asset files when injection is disabled', async t => {
   const root = fixture();
-  const standalone = fs.mkdtempSync(path.join(os.tmpdir(), 'mdit-explorer-standalone-'));
+  const standalone = fs.mkdtempSync(path.join(process.cwd(), '.mdit-explorer-standalone-'));
   t.after(() => fs.rmSync(root, { recursive: true }));
   t.after(() => fs.rmSync(standalone, { recursive: true }));
   fs.copyFileSync(new URL('../src/index.js', import.meta.url), path.join(standalone, 'index.mjs'));
